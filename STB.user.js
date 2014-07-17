@@ -2,10 +2,8 @@
 // @name        STB-Bundle
 // @namespace   STB-Bundle
 // @include     http://strategus.c-rpg.net/*
-// @downloadURL http://userscripts.org/scripts/source/171423.user.js
-// @updateURL   http://userscripts.org/scripts/source/171423.meta.js
-// @version     0.1.1
-// @grant       none
+// @downloadURL https://github.com/Chy59/STB/raw/master/STB.user.js
+// @version     0.2.0
 // ==/UserScript==
 
 function addJQuery(callback) {
