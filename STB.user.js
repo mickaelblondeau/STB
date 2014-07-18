@@ -681,8 +681,9 @@ function main() {
 				var playerId = cutString(jq(this).children().children('input').attr('name'), '[', ']');
 				var total = cutString(jq(this).children().children('span').text(), null, ' (all)');
 				var itemName = cutString(jq(this).children().children().html().split('</span> ')[1], null, ':');
-				if(playerId == 'troops' || playerId == 'gold') {
+				if(itemName === undefined)
 					var itemName = cutString(jq(this).children().children().html(), null, ':');
+				if(playerId == 'troops' || playerId == 'gold') {
 					if(playerId == 'troops')
 						var img = TROOP_ICON;
 					else if(playerId == 'gold')
