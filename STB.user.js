@@ -3,7 +3,8 @@
 // @namespace   STB-Bundle
 // @include     http://strategus.c-rpg.net/*
 // @downloadURL https://github.com/Chy59/STB/raw/master/STB.user.js
-// @version     0.2.1
+// @version     0.2.2
+// @grant       none
 // ==/UserScript==
 
 function addJQuery(callback) {
@@ -681,6 +682,8 @@ function main() {
 				var playerId = cutString(jq(this).children().children('input').attr('name'), '[', ']');
 				var total = cutString(jq(this).children().children('span').text(), null, ' (all)');
 				var itemName = cutString(jq(this).children().children().html().split('</span> ')[1], null, ':');
+				if(itemName === undefined)
+					var itemName = cutString(jq(this).children().children().html().split('</a> ')[1], null, ':');
 				if(itemName === undefined)
 					var itemName = cutString(jq(this).children().children().html(), null, ':');
 				if(playerId == 'troops' || playerId == 'gold') {
