@@ -28,6 +28,14 @@ class ArmouryManager {
         if(window.location.search == '?info' || location.href.indexOf('news.php?msg=') != -1) {
             ArmouryManager.LoadItems();
             ArmouryManager.UpdateItemPage();
+            // controls (- + all)
+            // add categories counters (update with current selection)
+            // add select helpers (all, unselectall, invert, split)
+            // add filters (categories, search text, loom)
+            // add presets (save, load, export import)
+
+            // not at trade range ?
+            // fief owner ?
         }
     }
 

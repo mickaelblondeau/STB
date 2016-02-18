@@ -36,6 +36,14 @@ class Item {
         }
     }
 
+    GetTooltip(): string {
+        if(this.itemId == SpecialItems.GOLD || this.itemId == SpecialItems.TROOPS) {
+            return '';
+        } else {
+            return 'itemstats.php?i=' + this.itemId + '&m=' + this.loomLevel;
+        }
+    }
+
     GetItemId(): string {
         if(this.itemId == SpecialItems.GOLD) {
             return 'gold';
@@ -60,7 +68,7 @@ class Item {
         return `
             <div class="item" data-loom="${this.loomLevel}" data-name="${this.name}" data-category="" data-id="${this.GetItemId()}" style="${this.GetColor()}">
                 <div class="header">
-                    <img width="70" height="70" src="${this.GetImage()}" title="${this.name}" class="itemstats">
+                    <img width="70" height="70" src="${this.GetImage()}" rel="${this.GetTooltip()}" title="${this.name}" class="itemstats">
                     <div class="name">${this.name}</div>
                 </div>
                 <div class="desc">
