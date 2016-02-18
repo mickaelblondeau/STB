@@ -1,0 +1,5 @@
+class MapManager {
+    static Start() {
+
+    }
+}
