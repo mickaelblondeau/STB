@@ -27,17 +27,19 @@ class Item {
     }
 
     GetImage(): string {
-        if(this.itemId == SpecialItems.GOLD) {
+        if(this.playerItemId == SpecialItems.GOLD) {
             return ArmouryManager.GOLD_ICON;
-        } else if(this.itemId == SpecialItems.TROOPS) {
+        } else if(this.playerItemId == SpecialItems.TROOPS) {
             return ArmouryManager.TROOP_ICON;
+        } else if(this.playerItemId == SpecialItems.UNKNOWN) {
+            return ArmouryManager.UNKNOWN_ICON;
         } else {
             return 'loadimage.php?id=' + this.itemId + '&lvl=' + this.loomLevel;
         }
     }
 
     GetTooltip(): string {
-        if(this.itemId == SpecialItems.GOLD || this.itemId == SpecialItems.TROOPS) {
+        if(this.playerItemId == SpecialItems.GOLD || this.playerItemId == SpecialItems.TROOPS || this.playerItemId == SpecialItems.UNKNOWN) {
             return '';
         } else {
             return 'itemstats.php?i=' + this.itemId + '&m=' + this.loomLevel;
@@ -86,6 +88,12 @@ class Item {
                 </div>
             </div>
         `;
+    }
+
+    GetInfoElement(): Element {
+        let node = document.createElement('div');
+        node.innerHTML = this.GetInfoHTML();
+        return node.firstElementChild;
     }
 
 }

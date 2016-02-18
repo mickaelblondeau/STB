@@ -3,7 +3,8 @@
 
 enum SpecialItems {
     GOLD = -1,
-    TROOPS = -2
+    TROOPS = -2,
+    UNKNOWN = -3,
 }
 
 class ArmouryManager {
@@ -109,14 +110,15 @@ class ArmouryManager {
             let item = ArmouryManager.FindItemById(itemId);
             if(item) {
                 item.count = count;
-
-                items[i].remove();
-
-                let node = document.createElement('div');
-                node.innerHTML = item.GetInfoHTML();
-
-                document.querySelector('table[name=transfertable] tbody').appendChild(node.firstElementChild);
+                document.querySelector('table[name=transfertable] tbody').appendChild(item.GetInfoElement());
+            } else {
+                let loom = items[i].querySelector('.mergeitemsInfo').textContent;
+                let newItem = new Item(itemId, SpecialItems.UNKNOWN, parseInt(loom), items[i].querySelector('b').textContent.replace(loom + ' ', '').replace(':', ''));
+                newItem.count = count;
+                ArmouryManager.items.push(newItem);
+                document.querySelector('table[name=transfertable] tbody').appendChild(newItem.GetInfoElement());
             }
+            items[i].remove();
         }
         document.querySelector('table[name=transfertable] tr').remove();
     }
