@@ -5,12 +5,28 @@ class Item {
     name: string;
     count: number = 0;
     category: ItemCategory;
+    input: HTMLInputElement;
+    previousValue: string = '0';
 
     constructor(itemId: number, playerItemId: number, loomLevel: number, name: string) {
         this.itemId = itemId;
         this.playerItemId = playerItemId;
         this.loomLevel = loomLevel;
         this.name = name;
+
+        for(let category of ArmouryManager.categories) {
+            for(let itemId of category.items) {
+                if(itemId == this.itemId) {
+                    this.category = category;
+                    this.category.count++;
+                    break;
+                }
+            }
+        }
+        if(this.category == null && !this.IsSpecialItem()) {
+            this.category = ArmouryManager.categories[0];
+            this.category.count++;
+        }
     }
 
     GetJSON() {
@@ -24,6 +40,10 @@ class Item {
             }
         }
         return null;
+    }
+
+    IsSpecialItem(): boolean {
+        return this.playerItemId == SpecialItems.GOLD || this.playerItemId == SpecialItems.TROOPS;
     }
 
     GetImage(): string {
@@ -68,7 +88,7 @@ class Item {
 
     GetInfoHTML(): string {
         return `
-            <div class="item" data-loom="${this.loomLevel}" data-name="${this.name}" data-category="" data-id="${this.GetItemId()}" style="${this.GetColor()}">
+            <div class="item" id="item-${this.playerItemId}" data-player-item-id="${this.playerItemId}" data-loom="${this.loomLevel}" data-name="${this.name}" data-category="" data-id="${this.GetItemId()}" style="${this.GetColor()}">
                 <div class="header">
                     <img width="70" height="70" src="${this.GetImage()}" rel="${this.GetTooltip()}" title="${this.name}" class="itemstats">
                     <div class="name">${this.name}</div>
@@ -96,4 +116,55 @@ class Item {
         return node.firstElementChild;
     }
 
+    GetCountInput(): HTMLInputElement {
+        return this.input != null ? this.input : this.input = <HTMLInputElement>document.getElementById('item-' + this.playerItemId).querySelector('.item-count-input');
+    }
+
+    UpdateInput(input: HTMLInputElement, value: string) {
+        input.value = value;
+        this.previousValue = input.value;
+    }
+
+    SubCount() {
+        let input = this.GetCountInput();
+        let newValue = parseInt(input.value) - 1;
+        if(newValue >= 0) {
+            this.UpdateInput(input, newValue.toString());
+
+            this.category.removeCount = (this.category.removeCount + 1);
+            this.category.UpdateElements();
+        }
+    }
+
+    AddCount() {
+        let input = this.GetCountInput();
+        let newValue = parseInt(input.value) + 1;
+        if(newValue <= this.count) {
+            this.UpdateInput(input, newValue.toString());
+
+            this.category.removeCount = (this.category.removeCount - 1);
+            this.category.UpdateElements();
+        }
+    }
+
+    SetTotal() {
+        let input = this.GetCountInput();
+        let previousValue = parseInt(input.value);
+        this.UpdateInput(input, this.count.toString());
+
+        let diff = this.count - previousValue;
+
+        this.category.removeCount = (this.category.removeCount - diff);
+        this.category.UpdateElements();
+    }
+
+    ChangeValue() {
+        let input = this.GetCountInput();
+        input.value = parseInt(input.value) < 0 ? '0' : (parseInt(input.value) > this.count ? this.count.toString() : input.value);
+        let diff = parseInt(input.value) - parseInt(this.previousValue);
+        this.UpdateInput(input, input.value);
+
+        this.category.removeCount = (this.category.removeCount - diff);
+        this.category.UpdateElements();
+    }
 }

@@ -30,11 +30,11 @@ class ArmouryManager {
             ArmouryManager.LoadItems();
             ArmouryManager.UpdateItemPage();
 
-            ArmouryManager.EventsListeners();
-            // add categories counters (update with current selection)
             // add select helpers (all, unselectall, invert, split)
             // add filters (categories, search text, loom)
             // add presets (save, load, export import)
+
+            ArmouryManager.EventsListeners();
 
             // not at trade range ?
             // fief owner ?
@@ -58,6 +58,25 @@ class ArmouryManager {
         ArmouryManager.categories.push(new ItemCategory('cat13', 'img/equip_arrow.png', 'Arrow', [481,482,484,483]));
         ArmouryManager.categories.push(new ItemCategory('cat14', 'img/equip_crossbow.png', 'Crossbow', [11,12,13,14,15]));
         ArmouryManager.categories.push(new ItemCategory('cat15', 'img/equip_bolt.png', 'Bolt', [485,486]));
+
+        let div = document.createElement('div');
+        div.setAttribute('id', 'stb-categories');
+        document.querySelector('table[name=transfertable] tbody').appendChild(div);
+
+        for(let category of ArmouryManager.categories) {
+            document.getElementById('stb-categories').appendChild(category.GetInfoElement());
+        }
+
+        div = document.createElement('div');
+        div.setAttribute('style', 'clear: both');
+        document.getElementById('stb-categories').appendChild(div);
+    }
+
+    static UpdateCategories() {
+        for(let category of ArmouryManager.categories) {
+            document.getElementById(category.id).querySelector('.count').textContent = category.count.toString();
+            document.getElementById(category.id).querySelector('.current').setAttribute('data-count', category.count.toString());
+        }
     }
 
     static ScanItems() {
@@ -93,9 +112,14 @@ class ArmouryManager {
         }
         ArmouryManager.items.push(new Item(SpecialItems.GOLD, SpecialItems.GOLD, 0, 'Gold'));
         ArmouryManager.items.push(new Item(SpecialItems.TROOPS, SpecialItems.TROOPS, 0, 'Troops'));
+        ArmouryManager.UpdateCategories();
     }
 
     static UpdateItemPage() {
+        let div = document.createElement('div');
+        div.setAttribute('id', 'stb-items');
+        document.querySelector('table[name=transfertable] tbody').appendChild(div);
+
         let items = document.querySelectorAll('table[name=transfertable] tr:not(:first-child)');
         for(let i = 0; i < items.length; ++i) {
             let id = items[i].querySelector('.in').getAttribute('id').split('hero_transfer_item_')[1];
@@ -111,13 +135,13 @@ class ArmouryManager {
             let item = ArmouryManager.FindItemById(itemId);
             if(item) {
                 item.count = count;
-                document.querySelector('table[name=transfertable] tbody').appendChild(item.GetInfoElement());
+                document.getElementById('stb-items').appendChild(item.GetInfoElement());
             } else {
                 let loom = items[i].querySelector('.mergeitemsInfo').textContent;
                 let newItem = new Item(itemId, SpecialItems.UNKNOWN, parseInt(loom), items[i].querySelector('b').textContent.replace(loom + ' ', '').replace(':', ''));
                 newItem.count = count;
                 ArmouryManager.items.push(newItem);
-                document.querySelector('table[name=transfertable] tbody').appendChild(newItem.GetInfoElement());
+                document.getElementById('stb-items').appendChild(newItem.GetInfoElement());
             }
             items[i].remove();
         }
@@ -137,21 +161,18 @@ class ArmouryManager {
         let minusButtons = document.querySelectorAll('.remove-count-from-item');
         for(let i = 0; i < minusButtons.length; ++i) {
             minusButtons[i].addEventListener('click', function(event) {
-                let input = this.parentElement.parentElement.querySelector('.item-count-input');
-                let newValue = parseInt(input.getAttribute('value')) - 1;
-                newValue = newValue < 0 ? 0 : newValue;
-                input.setAttribute('value', newValue);
+                let id = parseInt(this.parentElement.parentElement.parentElement.parentElement.getAttribute('data-player-item-id'));
+                let item = ArmouryManager.FindItemById(id);
+                item.SubCount();
             });
         }
 
         let plusButtons = document.querySelectorAll('.add-count-to-item');
         for(let i = 0; i < plusButtons.length; ++i) {
             plusButtons[i].addEventListener('click', function(event) {
-                let input = this.parentElement.parentElement.querySelector('.item-count-input');
-                let newValue = parseInt(input.getAttribute('value')) + 1;
-                let maxValue = parseInt(input.getAttribute('data-max'));
-                newValue = newValue > maxValue ? maxValue : newValue;
-                input.setAttribute('value', newValue);
+                let id = parseInt(this.parentElement.parentElement.parentElement.parentElement.getAttribute('data-player-item-id'));
+                let item = ArmouryManager.FindItemById(id);
+                item.AddCount();
             });
         }
 
@@ -159,8 +180,18 @@ class ArmouryManager {
         for(let i = 0; i < totalButtons.length; ++i) {
             totalButtons[i].addEventListener('click', function(event) {
                 event.preventDefault();
-                let input = this.parentElement.parentElement.querySelector('.item-count-input');
-                input.setAttribute('value', input.getAttribute('data-max'));
+                let id = parseInt(this.parentElement.parentElement.parentElement.getAttribute('data-player-item-id'));
+                let item = ArmouryManager.FindItemById(id);
+                item.SetTotal();
+            });
+        }
+
+        let inputs = document.querySelectorAll('.item-count-input');
+        for(let i = 0; i < inputs.length; ++i) {
+            inputs[i].addEventListener('change', function(event) {
+                let id = parseInt(this.parentElement.parentElement.parentElement.getAttribute('data-player-item-id'));
+                let item = ArmouryManager.FindItemById(id);
+                item.ChangeValue();
             });
         }
     }
