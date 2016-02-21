@@ -29,7 +29,8 @@ class ArmouryManager {
         if(window.location.search == '?info' || location.href.indexOf('news.php?msg=') != -1) {
             ArmouryManager.LoadItems();
             ArmouryManager.UpdateItemPage();
-            // controls (- + all)
+
+            ArmouryManager.EventsListeners();
             // add categories counters (update with current selection)
             // add select helpers (all, unselectall, invert, split)
             // add filters (categories, search text, loom)
@@ -130,5 +131,37 @@ class ArmouryManager {
             }
         }
         return null;
+    }
+
+    static EventsListeners() {
+        let minusButtons = document.querySelectorAll('.remove-count-from-item');
+        for(let i = 0; i < minusButtons.length; ++i) {
+            minusButtons[i].addEventListener('click', function(event) {
+                let input = this.parentElement.parentElement.querySelector('.item-count-input');
+                let newValue = parseInt(input.getAttribute('value')) - 1;
+                newValue = newValue < 0 ? 0 : newValue;
+                input.setAttribute('value', newValue);
+            });
+        }
+
+        let plusButtons = document.querySelectorAll('.add-count-to-item');
+        for(let i = 0; i < plusButtons.length; ++i) {
+            plusButtons[i].addEventListener('click', function(event) {
+                let input = this.parentElement.parentElement.querySelector('.item-count-input');
+                let newValue = parseInt(input.getAttribute('value')) + 1;
+                let maxValue = parseInt(input.getAttribute('data-max'));
+                newValue = newValue > maxValue ? maxValue : newValue;
+                input.setAttribute('value', newValue);
+            });
+        }
+
+        let totalButtons = document.querySelectorAll('.set-total-count');
+        for(let i = 0; i < totalButtons.length; ++i) {
+            totalButtons[i].addEventListener('click', function(event) {
+                event.preventDefault();
+                let input = this.parentElement.parentElement.querySelector('.item-count-input');
+                input.setAttribute('value', input.getAttribute('data-max'));
+            });
+        }
     }
 }

@@ -76,14 +76,14 @@ class Item {
                 <div class="desc">
                     <center>
                         <a class="abutton">
-                            <img src="img/ic_minus.png" style="vertical-align:middle">
+                            <img src="img/ic_minus.png" style="vertical-align:middle" class="remove-count-from-item">
                         </a>
-                        <input class="in" id="hero_transfer_item_${this.GetItemId()}" name="transfer[${this.GetItemId()}]" value="0">
+                        <input class="in item-count-input" id="hero_transfer_item_${this.GetItemId()}" name="transfer[${this.GetItemId()}]" value="0" data-max="${this.count}">
                         <a class="abutton">
-                            <img src="img/ic_plus.png" style="vertical-align:middle">
+                            <img src="img/ic_plus.png" style="vertical-align:middle" class="add-count-to-item">
                         </a>
                         <br>
-                        <a href="" count="${this.count}" class="setTotal">${this.count} (all)</a>
+                        <a href="#" class="set-total-count">${this.count} (all)</a>
                     </center>
                 </div>
             </div>
