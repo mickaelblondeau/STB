@@ -26,11 +26,11 @@ class ArmouryManager {
         if(window.location.search == '?inv') {
             ArmouryManager.ScanItems();
         }
-        if(window.location.search == '?info' || location.href.indexOf('news.php?msg=') != -1) {
+        if(window.location.search == '?info' || window.location.search.indexOf('?info&msg=') != -1 || window.location.search.indexOf('?msg=') != -1) {
             ArmouryManager.LoadItems();
             ArmouryManager.UpdateItemPage();
 
-            // add select helpers (all, unselectall, invert, split)
+            ArmouryManager.AddHelpers();
             // add filters (categories, search text, loom)
             // add presets (save, load, export import)
 
@@ -155,6 +155,59 @@ class ArmouryManager {
             }
         }
         return null;
+    }
+
+    static AddHelpers() {
+        let div = document.createElement('div');
+        div.setAttribute('id', 'stb-helpers');
+        div.innerHTML = `
+            <input type="button" id="stb_select_button" value="Select All" />
+            <input type="button" id="stb_unselect_button" value="Unselect All" />
+            <input type="button" id="stb_invert_button" value="Invert selection" />
+            <input type="text" id="stb_split_value" style="width: 50px" />%
+            <input type="button" id="stb_split_button" value="Split" />
+        `;
+
+        let node = document.getElementById('stb-items');
+        node.parentNode.insertBefore(div, node);
+
+        document.getElementById('stb_select_button').addEventListener('click', function(event) {
+            for(let item of ArmouryManager.items) {
+                if(item.IsFilterable()) {
+                    item.SetTotal();
+                }
+            }
+        });
+        document.getElementById('stb_unselect_button').addEventListener('click', function(event) {
+            for(let item of ArmouryManager.items) {
+                if(item.IsFilterable()) {
+                    item.SetEmpty();
+                }
+            }
+        });
+        document.getElementById('stb_invert_button').addEventListener('click', function(event) {
+            for(let item of ArmouryManager.items) {
+                if(item.IsFilterable()) {
+                    item.Invert();
+                }
+            }
+        });
+        document.getElementById('stb_split_button').addEventListener('click', function(event) {
+            let splitValue = parseInt((<HTMLInputElement>document.getElementById('stb_split_value')).value);
+            for(let item of ArmouryManager.items) {
+                if(item.IsFilterable()) {
+                    item.Split(splitValue);
+                }
+            }
+        });
+    }
+
+    static AddFilters() {
+
+    }
+
+    static AddPresets() {
+
     }
 
     static EventsListeners() {

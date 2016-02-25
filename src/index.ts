@@ -3,6 +3,6 @@
 
 if(window.location.pathname == "/index.php" || window.location.pathname == "/") {
     MapManager.Start();
-} else if (window.location.search == "?info" || window.location.search == "?inv" || window.location.search == "") {
+} else if (window.location.search == "?info" || window.location.search == "?inv" || window.location.search.indexOf('?info&msg=') != -1 || window.location.search.indexOf('?msg=') != -1) {
     ArmouryManager.Start();
 }

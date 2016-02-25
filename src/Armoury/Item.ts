@@ -7,6 +7,7 @@ class Item {
     category: ItemCategory;
     input: HTMLInputElement;
     previousValue: string = '0';
+    displayed: boolean = true;
 
     constructor(itemId: number, playerItemId: number, loomLevel: number, name: string) {
         this.itemId = itemId;
@@ -27,6 +28,10 @@ class Item {
             this.category = ArmouryManager.categories[0];
             this.category.count++;
         }
+    }
+
+    IsFilterable(): boolean {
+        return this.displayed && !this.IsSpecialItem();
     }
 
     GetJSON() {
@@ -153,6 +158,43 @@ class Item {
         this.UpdateInput(input, this.count.toString());
 
         let diff = this.count - previousValue;
+
+        this.category.removeCount = (this.category.removeCount - diff);
+        this.category.UpdateElements();
+    }
+
+    SetEmpty() {
+        let input = this.GetCountInput();
+        let previousValue = parseInt(input.value);
+        this.UpdateInput(input, '0');
+
+        let diff = -previousValue;
+
+        this.category.removeCount = (this.category.removeCount - diff);
+        this.category.UpdateElements();
+    }
+
+    Invert() {
+        let input = this.GetCountInput();
+        let previousValue = parseInt(input.value);
+        let newValue = this.count - previousValue;
+        this.UpdateInput(input, newValue.toString());
+
+        let diff = newValue - previousValue;
+
+        this.category.removeCount = (this.category.removeCount - diff);
+        this.category.UpdateElements();
+    }
+
+    Split(splitValue: number) {
+        splitValue = splitValue < 0 ? 0 : splitValue;
+        splitValue = splitValue > 100 ? 100 : splitValue;
+        let input = this.GetCountInput();
+        let previousValue = parseInt(input.value);
+        let newValue = Math.round(this.count * splitValue / 100);
+        this.UpdateInput(input, newValue.toString());
+
+        let diff = newValue - previousValue;
 
         this.category.removeCount = (this.category.removeCount - diff);
         this.category.UpdateElements();
