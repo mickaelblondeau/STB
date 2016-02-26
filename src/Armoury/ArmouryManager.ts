@@ -32,7 +32,7 @@ class ArmouryManager {
 
             ArmouryManager.AddHelpers();
             ArmouryManager.AddFilters();
-            // add presets (save, load, export import)
+            ArmouryManager.AddPresets();
 
             ArmouryManager.EventsListeners();
 
@@ -168,7 +168,7 @@ class ArmouryManager {
             <input type="button" id="stb_select_button" value="Select All" />
             <input type="button" id="stb_unselect_button" value="Unselect All" />
             <input type="button" id="stb_invert_button" value="Invert selection" />
-            <input type="text" id="stb_split_value" style="width: 50px" />%
+            <input type="text" id="stb_split_value" style="width: 50px" placeholder="Split %" />%
             <input type="button" id="stb_split_button" value="Split" />
         `;
 
@@ -272,7 +272,69 @@ class ArmouryManager {
     }
 
     static AddPresets() {
+        let div = document.createElement('div');
+        div.setAttribute('id', 'stb-presets');
+        div.innerHTML = `
+            <h4>Presets</h4>
+            <select id="stb_preset_saved">
+                <option value="-1">Select a Preset</option>
+            </select>
+            <input type="button" id="stb_preset_saved_use" value="Use" />
+            <input type="button" id="stb_preset_saved_delete" value="Delete" />
 
+            <input type="text" id="stb_preset_export_value" placeholder="Exported data will appear here" />
+            <input type="button" id="stb_preset_export" value="Export" />
+
+            <input type="text" id="stb_preset_import_value" placeholder="Put your data here to import" />
+            <input type="button" id="stb_preset_import" value="Import" />
+
+            <input type="text" id="stb_preset_save_value" placeholder="Save preset name" />
+            <input type="button" id="stb_preset_save" value="Save" />
+        `;
+
+        let node = document.getElementById('stb-items');
+        node.parentNode.insertBefore(div, node);
+
+        // append presets to selectbox
+        // on use : apply preset to current selection (if item with loom found : set quantity)
+        // on export : export current selection to text
+        // on import : import current text to select
+        // on save : save current selection to presets
+
+        document.getElementById('stb_preset_export').addEventListener('click', function() {
+            (<HTMLInputElement>document.getElementById('stb_preset_export_value')).value = JSON.stringify(ArmouryManager.CurrentSelectionToJSON());
+        });
+
+        document.getElementById('stb_preset_import').addEventListener('click', function() {
+            ArmouryManager.JSONToCurrentSelection((<HTMLInputElement>document.getElementById('stb_preset_import_value')).value);
+        });
+    }
+
+    static CurrentSelectionToJSON() : Array<Object> {
+        let results: Array<Object> = [];
+        let items = document.querySelectorAll('.item');
+        for(let i = 0; i < items.length; ++i) {
+            let item = items[i];
+            let loomLevel = item.getAttribute('data-loom');
+            let itemId = item.getAttribute('data-id');
+            let amount = parseInt((<HTMLInputElement>item.querySelector('.item-count-input')).value);
+            if(amount > 0) {
+                results.push({ i: itemId, l: loomLevel, a: amount });
+            }
+        }
+        return results;
+    }
+
+    static JSONToCurrentSelection(response: string) {
+        let results = JSON.parse(response);
+        for(let i = 0; i < results.length; ++i) {
+            let result = results[i];
+            let itemDiv = document.querySelector('.item[data-id="' + result.i + '"].item[data-loom="' + result.l + '"]');
+            (<HTMLInputElement>itemDiv.querySelector('.item-count-input')).value = result.a;
+            let id = parseInt(itemDiv.getAttribute('data-player-item-id'));
+            let item = ArmouryManager.FindItemById(id);
+            item.ChangeValue();
+        }
     }
 
     static EventsListeners() {
