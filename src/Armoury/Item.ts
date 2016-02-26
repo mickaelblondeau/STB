@@ -209,4 +209,47 @@ class Item {
         this.category.removeCount = (this.category.removeCount - diff);
         this.category.UpdateElements();
     }
+
+    Show() {
+        document.getElementById('item-' + this.playerItemId).style.display = '';
+        this.displayed = true;
+    }
+
+    Hide() {
+        document.getElementById('item-' + this.playerItemId).style.display = 'none';
+        this.displayed = false;
+    }
+
+    UpdateVisibility(category: string, loomComparator: string, loomLevel: number, search: string) {
+        if(this.IsSpecialItem() || (this.IsCorrectCategory(category) && this.IsCorrectLoom(loomComparator, loomLevel) && this.IsCorrectSearch(search))) {
+            this.Show();
+        } else {
+            this.Hide();
+        }
+    }
+
+    IsCorrectCategory(category: string): boolean {
+        return category == '-1' || category == this.category.id;
+    }
+
+    IsCorrectLoom(loomComparator: string, loomLevel: number): boolean {
+        switch(loomComparator) {
+            case '<=':
+                return this.loomLevel <= loomLevel;
+            case '<':
+                return this.loomLevel < loomLevel;
+            case '=':
+                return this.loomLevel == loomLevel;
+            case '>':
+                return this.loomLevel > loomLevel;
+            case '>=':
+                return this.loomLevel >= loomLevel;
+            default:
+                return false;
+        }
+    }
+
+    IsCorrectSearch(search: string): boolean {
+        return search == '' || this.name.toLowerCase().indexOf(search.toLowerCase()) != -1;
+    }
 }

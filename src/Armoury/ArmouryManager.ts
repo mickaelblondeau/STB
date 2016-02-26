@@ -31,7 +31,7 @@ class ArmouryManager {
             ArmouryManager.UpdateItemPage();
 
             ArmouryManager.AddHelpers();
-            // add filters (categories, search text, loom)
+            ArmouryManager.AddFilters();
             // add presets (save, load, export import)
 
             ArmouryManager.EventsListeners();
@@ -61,6 +61,9 @@ class ArmouryManager {
 
         let div = document.createElement('div');
         div.setAttribute('id', 'stb-categories');
+        div.innerHTML = `
+            <h4>Categories</h4>
+        `;
         document.querySelector('table[name=transfertable] tbody').appendChild(div);
 
         for(let category of ArmouryManager.categories) {
@@ -161,6 +164,7 @@ class ArmouryManager {
         let div = document.createElement('div');
         div.setAttribute('id', 'stb-helpers');
         div.innerHTML = `
+            <h4>Helpers</h4>
             <input type="button" id="stb_select_button" value="Select All" />
             <input type="button" id="stb_unselect_button" value="Unselect All" />
             <input type="button" id="stb_invert_button" value="Invert selection" />
@@ -203,7 +207,68 @@ class ArmouryManager {
     }
 
     static AddFilters() {
+        let div = document.createElement('div');
+        div.setAttribute('id', 'stb-filters');
+        div.innerHTML = `
+            <h4>Filters</h4>
+            <select id="stb_category_filter">
+                <option value="-1">All categories</option>
+            </select>
+            <select id="stb_loom_comparator_filter">
+                <option value=">=">&ge;</option>
+                <option value=">">&gt;</option>
+                <option value="=">=</option>
+                <option value="<">&lt;</option>
+                <option value="<=">&le;</option>
+            </select>
+            <select id="stb_loom_level_filter">
+                <option value="-4">-4</option>
+                <option value="-3">-3</option>
+                <option value="-2">-2</option>
+                <option value="-1">-1</option>
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+            </select>
+            <input type="text" id="stb_text_filter" placeholder="Search for items" />
+        `;
 
+        let node = document.getElementById('stb-items');
+        node.parentNode.insertBefore(div, node);
+
+        for(let category of ArmouryManager.categories) {
+            let option = document.createElement('option');
+            option.setAttribute('value', category.id);
+            option.innerHTML = category.name;
+            document.getElementById('stb_category_filter').appendChild(option);
+        }
+
+        document.getElementById('stb_category_filter').addEventListener('change', function() {
+            ArmouryManager.UpdateShownItems();
+        });
+
+        document.getElementById('stb_loom_comparator_filter').addEventListener('change', function() {
+            ArmouryManager.UpdateShownItems();
+        });
+
+        document.getElementById('stb_loom_level_filter').addEventListener('change', function() {
+            ArmouryManager.UpdateShownItems();
+        });
+
+        document.getElementById('stb_text_filter').addEventListener('keyup', function() {
+            ArmouryManager.UpdateShownItems();
+        });
+    }
+
+    static UpdateShownItems() {
+        let category = (<HTMLInputElement>document.getElementById('stb_category_filter')).value;
+        let loomComparator = (<HTMLInputElement>document.getElementById('stb_loom_comparator_filter')).value;
+        let loomLevel = parseInt((<HTMLInputElement>document.getElementById('stb_loom_level_filter')).value);
+        let search = (<HTMLInputElement>document.getElementById('stb_text_filter')).value;
+        for(let item of ArmouryManager.items) {
+            item.UpdateVisibility(category, loomComparator, loomLevel, search);
+        }
     }
 
     static AddPresets() {
