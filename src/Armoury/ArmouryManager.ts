@@ -106,12 +106,10 @@ class ArmouryManager {
     }
 
     static LoadItems() {
-        let itemsJSON = localStorage.getItem('stb3_items');
-        if(itemsJSON != '') {
-            let items = JSON.parse(itemsJSON);
-            for(let item of items) {
-                ArmouryManager.items.push(new Item(item.itemId, item.playerItemId, item.loomLevel, item.name));
-            }
+        let itemsJSON = localStorage.getItem('stb3_items') || '[]';
+        let items = JSON.parse(itemsJSON);
+        for(let item of items) {
+            ArmouryManager.items.push(new Item(item.itemId, item.playerItemId, item.loomLevel, item.name));
         }
         ArmouryManager.items.push(new Item(SpecialItems.GOLD, SpecialItems.GOLD, 0, 'Gold'));
         ArmouryManager.items.push(new Item(SpecialItems.TROOPS, SpecialItems.TROOPS, 0, 'Troops'));
@@ -295,11 +293,32 @@ class ArmouryManager {
         let node = document.getElementById('stb-items');
         node.parentNode.insertBefore(div, node);
 
-        // append presets to selectbox
-        // on use : apply preset to current selection (if item with loom found : set quantity)
-        // on export : export current selection to text
-        // on import : import current text to select
-        // on save : save current selection to presets
+        let presets = ArmouryManager.LoadPresets();
+        for(let key in presets) {
+            ArmouryManager.AddPresetOption(key);
+        }
+
+        document.getElementById('stb_preset_saved_use').addEventListener('click', function() {
+            let presets = ArmouryManager.LoadPresets();
+
+            let saveName = (<HTMLInputElement>document.getElementById('stb_preset_saved')).value;
+
+            if(presets[saveName]) {
+                ArmouryManager.JSONToCurrentSelection(JSON.stringify(presets[saveName]));
+            }
+        });
+
+        document.getElementById('stb_preset_saved_delete').addEventListener('click', function() {
+            let presets = ArmouryManager.LoadPresets();
+
+            let saveName = (<HTMLInputElement>document.getElementById('stb_preset_saved')).value;
+
+            if(presets[saveName]) {
+                delete presets[saveName];
+                localStorage.setItem('stb3_presets', JSON.stringify(presets));
+                document.querySelector('#stb_preset_saved option[value="' + saveName + '"]').remove();
+            }
+        });
 
         document.getElementById('stb_preset_export').addEventListener('click', function() {
             (<HTMLInputElement>document.getElementById('stb_preset_export_value')).value = JSON.stringify(ArmouryManager.CurrentSelectionToJSON());
@@ -308,6 +327,36 @@ class ArmouryManager {
         document.getElementById('stb_preset_import').addEventListener('click', function() {
             ArmouryManager.JSONToCurrentSelection((<HTMLInputElement>document.getElementById('stb_preset_import_value')).value);
         });
+
+        document.getElementById('stb_preset_save').addEventListener('click', function() {
+            let presets = ArmouryManager.LoadPresets();
+
+            let input = <HTMLInputElement>document.getElementById('stb_preset_save_value');
+            let saveName = input.value;
+            presets[saveName] = ArmouryManager.CurrentSelectionToJSON();
+
+            localStorage.setItem('stb3_presets', JSON.stringify(presets));
+
+            ArmouryManager.AddPresetOption(saveName);
+
+            input.value = '';
+        });
+    }
+
+    static LoadPresets(): { [name: string]: Object } {
+        let localPresets = localStorage.getItem('stb3_presets') || '{}';
+        return JSON.parse(localPresets);
+    }
+
+    static AddPresetOption(name: string) {
+        let duplicate: Element = document.querySelector('#stb_preset_saved option[value="' + name + '"]');
+        if(duplicate) {
+            duplicate.remove();
+        }
+        let option = document.createElement('option');
+        option.setAttribute('value', name);
+        option.innerHTML = name;
+        document.getElementById('stb_preset_saved').appendChild(option);
     }
 
     static CurrentSelectionToJSON() : Array<Object> {
