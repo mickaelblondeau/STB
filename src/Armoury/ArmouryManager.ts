@@ -17,9 +17,9 @@ class ArmouryManager {
     static TRADE_ICON = 'http://i.imgur.com/o5WoZPb.png';
     static UNKNOWN_ICON = 'http://i.imgur.com/TSKPuy0.png';
     static SIEGE_ICON = 'http://i.imgur.com/k5t4Gi2.png';
-
     static categories: Array<ItemCategory> = [];
     static items: Array<Item> = [];
+    static simulation: boolean = false;
 
     static Start() {
         ArmouryManager.InitCategories();
@@ -27,9 +27,16 @@ class ArmouryManager {
             ArmouryManager.ScanItems();
         }
         if(window.location.search == '?info' || window.location.search.indexOf('?info&msg=') != -1 || window.location.search.indexOf('?msg=') != -1) {
+            ArmouryManager.CreateContainer();
+
             ArmouryManager.LoadCategoryBlock();
             ArmouryManager.LoadItems();
-            ArmouryManager.UpdateItemPage();
+
+            if(ArmouryManager.simulation) {
+                ArmouryManager.UpdateItemSimulationPage();
+            } else {
+                ArmouryManager.UpdateItemPage();
+            }
 
             ArmouryManager.AddHelpers();
             ArmouryManager.AddFilters();
@@ -37,8 +44,21 @@ class ArmouryManager {
 
             ArmouryManager.EventsListeners();
 
-            // not at trade range ?
+            // not at trade range : simulate list (do not fill player id)
             // fief owner ?
+        }
+    }
+
+    static CreateContainer() {
+        let div = document.createElement('div');
+        div.setAttribute('id', 'stb-container');
+
+        let table = document.querySelector('table[name=transfertable]');
+        if(table) {
+            document.querySelector('table[name=transfertable] tbody').appendChild(div);
+        } else {
+            document.querySelector('#info_page fieldset form').appendChild(div);
+            ArmouryManager.simulation = true;
         }
     }
 
@@ -67,7 +87,7 @@ class ArmouryManager {
         div.innerHTML = `
             <h4>Categories</h4>
         `;
-        document.querySelector('table[name=transfertable] tbody').appendChild(div);
+        document.getElementById('stb-container').appendChild(div);
 
         for(let category of ArmouryManager.categories) {
             document.getElementById('stb-categories').appendChild(category.GetInfoElement());
@@ -93,8 +113,9 @@ class ArmouryManager {
             let rel = items[i].querySelector('.itemstats').getAttribute('rel').split('itemstats.php?i=')[1];
             let itemId = parseInt(rel.split('&m=')[0]);
             let loomLevel = parseInt(rel.split('&m=')[1]);
-            let playerItemId = parseInt(items[i].querySelector('.desc .in').getAttribute('name').split('sell[')[1].split(']')[0]);
-            let item = new Item(itemId, playerItemId, loomLevel, itemName);
+            let playerItemId = parseInt(items[i].querySelector('.itemvisibility ').getAttribute('name').split('itemvisibility[')[1].split(']')[0]);
+            let count = parseInt(items[i].querySelector('.desc').textContent.split('Number: ')[1].split("\n")[0]);
+            let item = new Item(itemId, playerItemId, loomLevel, itemName, count);
             ArmouryManager.items.push(item);
         }
         ArmouryManager.SaveItems();
@@ -109,22 +130,22 @@ class ArmouryManager {
     }
 
     static LoadItems() {
+        ArmouryManager.items.push(new Item(SpecialItems.GOLD, SpecialItems.GOLD, 0, 'Gold', parseInt(document.querySelector('#sub > .block > div').textContent.split('Gold: ')[1].split("\n")[0])));
+        ArmouryManager.items.push(new Item(SpecialItems.TROOPS, SpecialItems.TROOPS, 0, 'Troops', parseInt(document.querySelector('#sub > .block > div').textContent.split('Troops: ')[1].split("\n")[0])));
         let itemsJSON = localStorage.getItem('stb3_items') || '[]';
         let items = JSON.parse(itemsJSON);
         for(let item of items) {
-            ArmouryManager.items.push(new Item(item.i, item.p, item.l, item.n));
+            ArmouryManager.items.push(new Item(item.i, item.p, item.l, item.n, item.c));
         }
-        ArmouryManager.items.push(new Item(SpecialItems.GOLD, SpecialItems.GOLD, 0, 'Gold'));
-        ArmouryManager.items.push(new Item(SpecialItems.TROOPS, SpecialItems.TROOPS, 0, 'Troops'));
         ArmouryManager.UpdateCategories();
     }
 
     static UpdateItemPage() {
         let div = document.createElement('div');
         div.setAttribute('id', 'stb-items');
-        document.querySelector('table[name=transfertable] tbody').appendChild(div);
+        document.getElementById('stb-container').appendChild(div);
 
-        let items = document.querySelectorAll('table[name=transfertable] tr:not(:first-child)');
+        let items = document.querySelectorAll('#stb-container tr:not(:first-child)');
         for(let i = 0; i < items.length; ++i) {
             let id = items[i].querySelector('.in').getAttribute('id').split('hero_transfer_item_')[1];
             let count = parseInt(items[i].querySelector('.useall_hero').textContent.split(' (all)')[0]);
@@ -142,14 +163,23 @@ class ArmouryManager {
                 document.getElementById('stb-items').appendChild(item.GetInfoElement());
             } else {
                 let loom = items[i].querySelector('.mergeitemsInfo').textContent;
-                let newItem = new Item(itemId, SpecialItems.UNKNOWN, parseInt(loom), items[i].querySelector('b').textContent.replace(loom + ' ', '').replace(':', ''));
-                newItem.count = count;
+                let newItem = new Item(itemId, SpecialItems.UNKNOWN, parseInt(loom), items[i].querySelector('b').textContent.replace(loom + ' ', '').replace(':', ''), count);
                 ArmouryManager.items.push(newItem);
                 document.getElementById('stb-items').appendChild(newItem.GetInfoElement());
             }
             items[i].remove();
         }
-        document.querySelector('table[name=transfertable] tr').remove();
+        document.querySelector('#stb-container tr').remove();
+    }
+
+    static UpdateItemSimulationPage() {
+        let div = document.createElement('div');
+        div.setAttribute('id', 'stb-items');
+        document.getElementById('stb-container').appendChild(div);
+
+        for(let item of ArmouryManager.items) {
+            document.getElementById('stb-items').appendChild(item.GetInfoElement());
+        }
     }
 
     static FindItemById(playerItemId: number): Item {

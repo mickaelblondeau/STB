@@ -4,16 +4,17 @@ class Item {
     loomLevel: number = 0;
     name: string;
     count: number = 0;
-    category: ItemCategory;
+    category: ItemCategory = null;
     input: HTMLInputElement;
     previousValue: string = '0';
     displayed: boolean = true;
 
-    constructor(itemId: number, playerItemId: number, loomLevel: number, name: string) {
+    constructor(itemId: number, playerItemId: number, loomLevel: number, name: string, count: number) {
         this.itemId = itemId;
         this.playerItemId = playerItemId;
         this.loomLevel = loomLevel;
         this.name = name;
+        this.count = count;
 
         for(let category of ArmouryManager.categories) {
             for(let itemId of category.items) {
@@ -35,7 +36,7 @@ class Item {
     }
 
     GetJSON() {
-        return { i: this.itemId, p: this.playerItemId, l: this.loomLevel, n: this.name };
+        return { i: this.itemId, p: this.playerItemId, l: this.loomLevel, n: this.name, c: this.count };
     }
 
     GetCategory(): ItemCategory {
@@ -136,8 +137,7 @@ class Item {
         if(newValue >= 0) {
             this.UpdateInput(input, newValue.toString());
 
-            this.category.removeCount = (this.category.removeCount + 1);
-            this.category.UpdateElements();
+            this.UpdateCategoryCount(-1);
         }
     }
 
@@ -147,8 +147,7 @@ class Item {
         if(newValue <= this.count) {
             this.UpdateInput(input, newValue.toString());
 
-            this.category.removeCount = (this.category.removeCount - 1);
-            this.category.UpdateElements();
+            this.UpdateCategoryCount(1);
         }
     }
 
@@ -159,8 +158,7 @@ class Item {
 
         let diff = this.count - previousValue;
 
-        this.category.removeCount = (this.category.removeCount - diff);
-        this.category.UpdateElements();
+        this.UpdateCategoryCount(diff);
     }
 
     SetEmpty() {
@@ -170,8 +168,7 @@ class Item {
 
         let diff = -previousValue;
 
-        this.category.removeCount = (this.category.removeCount - diff);
-        this.category.UpdateElements();
+        this.UpdateCategoryCount(diff);
     }
 
     Invert() {
@@ -182,8 +179,7 @@ class Item {
 
         let diff = newValue - previousValue;
 
-        this.category.removeCount = (this.category.removeCount - diff);
-        this.category.UpdateElements();
+        this.UpdateCategoryCount(diff);
     }
 
     Split(splitValue: number) {
@@ -196,8 +192,7 @@ class Item {
 
         let diff = newValue - previousValue;
 
-        this.category.removeCount = (this.category.removeCount - diff);
-        this.category.UpdateElements();
+        this.UpdateCategoryCount(diff);
     }
 
     ChangeValue() {
@@ -206,8 +201,14 @@ class Item {
         let diff = parseInt(input.value) - parseInt(this.previousValue);
         this.UpdateInput(input, input.value);
 
-        this.category.removeCount = (this.category.removeCount - diff);
-        this.category.UpdateElements();
+        this.UpdateCategoryCount(diff);
+    }
+
+    UpdateCategoryCount(diff: number) {
+        if(this.category) {
+            this.category.removeCount = (this.category.removeCount - diff);
+            this.category.UpdateElements();
+        }
     }
 
     Show() {
