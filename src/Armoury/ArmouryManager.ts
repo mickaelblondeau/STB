@@ -23,10 +23,10 @@ class ArmouryManager {
 
     static Start() {
         ArmouryManager.InitCategories();
-        if(window.location.search == '?inv') {
+        if(isOnPage('news.php?inv')) {
             ArmouryManager.ScanItems();
         }
-        if(window.location.search == '?info' || window.location.search.indexOf('?info&msg=') != -1 || window.location.search.indexOf('?msg=') != -1) {
+        if(isOnPage('news.php?info') || isOnPage('news.php?info&msg=') || isOnPage('news.php?msg=')) {
             ArmouryManager.CreateContainer();
 
             ArmouryManager.LoadCategoryBlock();

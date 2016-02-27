@@ -1,8 +1,14 @@
 ///<reference path="Armoury/ArmouryManager.ts"/>
 ///<reference path="Map/MapManager.ts"/>
 
-if(window.location.pathname == "/index.php" || window.location.pathname == "/") {
+let currentPageUrl = window.location.pathname + window.location.search;
+
+function isOnPage(page: string): boolean {
+    return currentPageUrl.indexOf(page) != -1;
+}
+
+if(window.location.pathname == '/index.php' || window.location.pathname == '/') {
     MapManager.Start();
-} else if (window.location.search == "?info" || window.location.search == "?inv" || window.location.search.indexOf('?info&msg=') != -1 || window.location.search.indexOf('?msg=') != -1) {
+} else if (isOnPage('news.php?info') || isOnPage('news.php?inv') || isOnPage('news.php?info&msg=') || isOnPage('news.php?msg=') || isOnPage('news.php?buy')) {
     ArmouryManager.Start();
 }
