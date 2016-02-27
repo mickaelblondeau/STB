@@ -27,6 +27,7 @@ class ArmouryManager {
             ArmouryManager.ScanItems();
         }
         if(window.location.search == '?info' || window.location.search.indexOf('?info&msg=') != -1 || window.location.search.indexOf('?msg=') != -1) {
+            ArmouryManager.LoadCategoryBlock();
             ArmouryManager.LoadItems();
             ArmouryManager.UpdateItemPage();
 
@@ -58,7 +59,9 @@ class ArmouryManager {
         ArmouryManager.categories.push(new ItemCategory('cat13', 'img/equip_arrow.png', 'Arrow', [481,482,484,483]));
         ArmouryManager.categories.push(new ItemCategory('cat14', 'img/equip_crossbow.png', 'Crossbow', [11,12,13,14,15]));
         ArmouryManager.categories.push(new ItemCategory('cat15', 'img/equip_bolt.png', 'Bolt', [485,486]));
+    }
 
+    static LoadCategoryBlock() {
         let div = document.createElement('div');
         div.setAttribute('id', 'stb-categories');
         div.innerHTML = `
@@ -109,7 +112,7 @@ class ArmouryManager {
         let itemsJSON = localStorage.getItem('stb3_items') || '[]';
         let items = JSON.parse(itemsJSON);
         for(let item of items) {
-            ArmouryManager.items.push(new Item(item.itemId, item.playerItemId, item.loomLevel, item.name));
+            ArmouryManager.items.push(new Item(item.i, item.p, item.l, item.n));
         }
         ArmouryManager.items.push(new Item(SpecialItems.GOLD, SpecialItems.GOLD, 0, 'Gold'));
         ArmouryManager.items.push(new Item(SpecialItems.TROOPS, SpecialItems.TROOPS, 0, 'Troops'));

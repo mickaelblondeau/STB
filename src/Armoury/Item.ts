@@ -35,7 +35,7 @@ class Item {
     }
 
     GetJSON() {
-        return { itemId: this.itemId, playerItemId: this.playerItemId, loomLevel: this.loomLevel, name: this.name };
+        return { i: this.itemId, p: this.playerItemId, l: this.loomLevel, n: this.name };
     }
 
     GetCategory(): ItemCategory {
