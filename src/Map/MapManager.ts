@@ -1,4 +1,5 @@
 ///<reference path="MapData.ts"/>
+///<reference path="SVGManager.ts"/>
 
 class MapManager {
     static width: number = 5900;
@@ -6,6 +7,7 @@ class MapManager {
     static scale: number = 1;
     static fiefs: Array<any> = [];
     static colors: Array<any> = [];
+    static diplomacies: Array<any> = [];
     static factionId: number = 0;
     static tradeValues: Array<any> = [
         { name: '+160% / +170%', size: 32, color: 'grey' },
@@ -15,6 +17,7 @@ class MapManager {
         { name: '-50% / -43%', size: 5, color: 'blue' },
         { name: '-50%', size: 1.5, color: 'white' },
     ];
+    static selectedFief: number = 0;
 
     static Start() {
         MapManager.CheckLoaded();
@@ -55,9 +58,9 @@ class MapManager {
     }
 
     static LoadMap() {
-        MapManager.CreateSVG('factionSVG', 'position:absolute; z-index:1; display:none;');
-        MapManager.CreateSVG('diploSVG', 'position:absolute; z-index:1; display:none;');
-        MapManager.CreateSVG('tradeSVG', 'position:absolute; z-index:1; display:none; opacity: 0.5;');
+        CreateSVG('factionSVG', 'position:absolute; z-index:1; display:none;');
+        CreateSVG('diploSVG', 'position:absolute; z-index:1; display:none;');
+        CreateSVG('tradeSVG', 'position:absolute; z-index:1; display:none; opacity: 0.5;');
 
         let legend = document.createElement('div');
         legend.setAttribute('id', 'legend');
@@ -129,17 +132,6 @@ class MapManager {
         MapManager.MapEvents();
     }
 
-    static CreateSVG(id: string, style: string) {
-        let svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttributeNS(null, 'id', id);
-        svg.setAttributeNS(null, 'height', '4488');
-        svg.setAttributeNS(null, 'width', '5900');
-        svg.setAttributeNS(null, 'style', style);
-        svg.setAttributeNS(null, 'class', 'stb-maps');
-
-        document.getElementById('game').appendChild(svg);
-    }
-
     static GetLegendLine(name: string, color: string) {
         return `<div style="width:10px;height:10px;background:${color};border:1px solid black;display:inline-block;"></div> ${name}<br>`;
     }
@@ -177,22 +169,21 @@ class MapManager {
         MapManager.factionId = MapManager.RbgToId(window.getComputedStyle(document.querySelector('#game .heroes.player p')).color);
     }
 
-    static LoadDiplomacy(): Array<any> {
-        // load from local storage
-        return [];
+    static LoadDiplomacy() {
+        MapManager.diplomacies = JSON.parse(localStorage.getItem('stb3_diplomacy') || '{}');
     }
 
     static GenerateMap() {
         for(let color of MapManager.colors) {
-            MapManager.CreateGroup(color.color, 'factionSVG', color.id);
+            CreateGroup(color.color, 'factionSVG', color.id);
         }
 
-        MapManager.CreateGroup('rgb(0, 0, 255)', 'diploSVG', 'Y');
-        MapManager.CreateGroup('rgb(0, 255, 255)', 'diploSVG', 'A');
-        MapManager.CreateGroup('rgb(0, 255, 0)', 'diploSVG', 'F');
-        MapManager.CreateGroup('rgb(255, 255, 255)', 'diploSVG', 'N');
-        MapManager.CreateGroup('rgb(255, 127, 0)', 'diploSVG', 'H');
-        MapManager.CreateGroup('rgb(255, 0, 0)', 'diploSVG', 'W');
+        CreateGroup('rgb(0, 0, 255)', 'diploSVG', 'Y');
+        CreateGroup('rgb(0, 255, 255)', 'diploSVG', 'A');
+        CreateGroup('rgb(0, 255, 0)', 'diploSVG', 'F');
+        CreateGroup('rgb(255, 255, 255)', 'diploSVG', 'N');
+        CreateGroup('rgb(255, 127, 0)', 'diploSVG', 'H');
+        CreateGroup('rgb(255, 0, 0)', 'diploSVG', 'W');
 
         let mapData = MapManager.GetMapData();
         for(let data of mapData) {
@@ -208,23 +199,22 @@ class MapManager {
 
             for(let fief of MapManager.fiefs) {
                 if(fief.name == data.fief) {
-                    MapManager.AddToGroup(line, fief.colorId, fief.colorId);
+                    AddToGroup(line, fief.colorId, fief.colorId);
                     if(MapManager.factionId == fief.colorId) {
-                        MapManager.AddToGroup(line, fief.colorId, 'Y');
+                        AddToGroup(line, fief.colorId, 'Y');
                     } else {
                         var notfound = true;
 
-                        let diplomacy = MapManager.LoadDiplomacy();
-                        for(let relation of diplomacy) {
-                            if(MapManager.RbgToId(fief.colorId) == relation.id) {
-                                MapManager.AddToGroup(line, fief.colorId, relation.type);
+                        for(let id in MapManager.diplomacies) {
+                            if(fief.colorId == id) {
+                                AddToGroup(line, fief.colorId, MapManager.diplomacies[id]);
                                 notfound = false;
                                 break;
                             }
                         }
 
                         if(notfound) {
-                            MapManager.AddToGroup(line, fief.colorId, 'N');
+                            AddToGroup(line, fief.colorId, 'N');
                         }
                     }
                 }
@@ -243,34 +233,6 @@ class MapManager {
         }
 
         return 'rgb(' + colors[0] + ', ' +colors[1] + ', ' + colors[2] + ')';
-    }
-
-    static CreateGroup(color: string, name: string, id: string) {
-        let group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        group.setAttributeNS(null, 'fill', 'none');
-        group.setAttributeNS(null, 'stroke', 'black');
-        group.setAttributeNS(null, 'stroke-width', '6');
-        group.setAttributeNS(null, 'id', id + '_1');
-        document.getElementById(name).appendChild(group);
-
-        group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        group.setAttributeNS(null, 'fill', color);
-        group.setAttributeNS(null, 'stroke', MapManager.EditColor(color, 50));
-        group.setAttributeNS(null, 'stroke-width', '2');
-        group.setAttributeNS(null, 'opacity', '0.4');
-        group.setAttributeNS(null, 'id', id + '_2');
-        document.getElementById(name).appendChild(group);
-    }
-
-    static AddToGroup(line: string , id: string , group: string) {
-        let path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttributeNS(null, 'd', line);
-        document.getElementById(group + '_1').appendChild(path);
-
-        path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttributeNS(null, 'd', line);
-        path.setAttributeNS(null, 'class', id);
-        document.getElementById(group + '_2').appendChild(path);
     }
 
     static CheckScale() {
@@ -319,27 +281,46 @@ class MapManager {
                 this.setAttribute('opacity', '1');
             });
             paths[i].addEventListener('dblclick', function() {
-                // show diplomacy menu
-                // save current selection
+                MapManager.selectedFief = parseInt(this.getAttribute('class'));
+                document.getElementById('diplomaticOptions').style.display = '';
+
+                if(MapManager.diplomacies[MapManager.selectedFief] != undefined) {
+                    let input = <HTMLInputElement>document.querySelector('#diplomaticOptions input[value="' + MapManager.diplomacies[MapManager.selectedFief] + '"]');
+                    input.checked = true;
+                } else {
+                    let input = <HTMLInputElement>document.querySelector('#diplomaticOptions input[value="N"]');
+                    input.checked = true;
+                }
             });
         }
 
-        // import diplo
-        // export diplo
-        // clear diplo
+        let options = document.querySelectorAll('#diplomaticOptions input[name=diploType]');
+        for(let i = 0; i < options.length; ++i) {
+            options[i].addEventListener('change', function() {
+                MapManager.diplomacies[MapManager.selectedFief] = this.value;
+                localStorage.setItem('stb3_diplomacy', JSON.stringify(MapManager.diplomacies));
+            });
+        }
 
-        paths = document.querySelectorAll('#game .icon');
-        for(let i = 0; i < paths.length; ++i) {
-            paths[i].addEventListener('click', function() {
+        document.getElementById('importDiplo').addEventListener('click', function() {
+            MapManager.diplomacies = JSON.parse((<HTMLInputElement>document.getElementById('diploImport')).value);
+            localStorage.setItem('stb3_diplomacy', JSON.stringify(MapManager.diplomacies));
+        });
+
+        document.getElementById('exportDiplo').addEventListener('click', function() {
+            (<HTMLInputElement>document.getElementById('diploExport')).value = JSON.stringify(MapManager.diplomacies);
+        });
+
+        document.getElementById('clearDiplo').addEventListener('click', function() {
+            localStorage.setItem('stb3_diplomacy', '{}');
+        });
+
+        let icons = document.querySelectorAll('#game .icon');
+        for(let i = 0; i < icons.length; ++i) {
+            icons[i].addEventListener('click', function() {
                 document.getElementById('tradeSVG').innerHTML = '';
 
-                let rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                rect.setAttributeNS(null, 'x', '0');
-                rect.setAttributeNS(null, 'y', '0');
-                rect.setAttributeNS(null, 'width', '100%');
-                rect.setAttributeNS(null, 'height', '100%');
-                rect.setAttributeNS(null, 'fill', 'purple');
-                document.getElementById('tradeSVG').appendChild(rect);
+                DrawCube();
 
                 let style = window.getComputedStyle(this);
 
@@ -386,17 +367,6 @@ class MapManager {
 
     static AddTradeCircle(x: number, y: number, size: number, color: string) {
         let pixelPerKm = 40;
-        MapManager.DrawCircle(x.toString(), y.toString(), (size * pixelPerKm).toString(), 'black', '2', color);
-    }
-
-    static DrawCircle(x: string, y: string, r: string, stroke: string, width: string, fill: string) {
-        let circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        circle.setAttributeNS(null, 'cx', x);
-        circle.setAttributeNS(null, 'cy', y);
-        circle.setAttributeNS(null, 'r', r);
-        circle.setAttributeNS(null, 'stroke', stroke);
-        circle.setAttributeNS(null, 'stroke-width', width);
-        circle.setAttributeNS(null, 'fill', fill);
-        document.getElementById("tradeSVG").appendChild(circle);
+        DrawCircle(x.toString(), y.toString(), (size * pixelPerKm).toString(), 'black', '2', color);
     }
 }
