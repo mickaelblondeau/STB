@@ -8,6 +8,7 @@ class Item {
     input: HTMLInputElement;
     previousValue: string = '0';
     displayed: boolean = true;
+    inFief: boolean = false;
 
     constructor(itemId: number, playerItemId: number, loomLevel: number, name: string, count: number) {
         this.itemId = itemId;
@@ -15,20 +16,29 @@ class Item {
         this.loomLevel = loomLevel;
         this.name = name;
         this.count = count;
+    }
+
+    updateCategory(count: number, isFief: boolean) {
+        this.count = count;
+        this.inFief = isFief;
 
         for(let category of ArmouryManager.categories) {
             for(let itemId of category.items) {
                 if(itemId == this.itemId) {
                     this.category = category;
-                    this.category.count++;
+                    this.category.count += this.count;
                     break;
                 }
             }
         }
         if(this.category == null && !this.IsSpecialItem()) {
             this.category = ArmouryManager.categories[0];
-            this.category.count++;
+            this.category.count += this.count;
         }
+    }
+
+    static Exist(playerItemId: string): boolean {
+        return document.getElementById(playerItemId) != null;
     }
 
     IsFilterable(): boolean {
@@ -39,33 +49,26 @@ class Item {
         return { i: this.itemId, p: this.playerItemId, l: this.loomLevel, n: this.name, c: this.count };
     }
 
-    GetCategory(): ItemCategory {
-        for(let category in ArmouryManager.categories) {
-            if(category.items.indexOf(this.itemId) != -1) {
-                return category;
-            }
-        }
-        return null;
-    }
-
     IsSpecialItem(): boolean {
-        return this.playerItemId == SpecialItems.GOLD || this.playerItemId == SpecialItems.TROOPS;
+        return this.itemId == SpecialItems.GOLD || this.itemId == SpecialItems.TROOPS;
     }
 
     GetImage(): string {
-        if(this.playerItemId == SpecialItems.GOLD) {
+        if(this.itemId == SpecialItems.GOLD) {
             return ArmouryManager.GOLD_ICON;
-        } else if(this.playerItemId == SpecialItems.TROOPS) {
+        } else if(this.itemId == SpecialItems.TROOPS) {
             return ArmouryManager.TROOP_ICON;
-        } else if(this.playerItemId == SpecialItems.UNKNOWN) {
+        } else if(this.itemId == SpecialItems.UNKNOWN) {
             return ArmouryManager.UNKNOWN_ICON;
+        } else if(this.itemId == SpecialItems.TRADE) {
+            return ArmouryManager.TRADE_ICON;
         } else {
             return 'loadimage.php?id=' + this.itemId + '&lvl=' + this.loomLevel;
         }
     }
 
     GetTooltip(): string {
-        if(this.playerItemId == SpecialItems.GOLD || this.playerItemId == SpecialItems.TROOPS || this.playerItemId == SpecialItems.UNKNOWN) {
+        if(this.itemId == SpecialItems.GOLD || this.itemId == SpecialItems.TROOPS || this.itemId == SpecialItems.UNKNOWN || this.itemId == SpecialItems.TRADE) {
             return '';
         } else {
             return 'itemstats.php?i=' + this.itemId + '&m=' + this.loomLevel;
@@ -92,9 +95,13 @@ class Item {
         }
     }
 
+    GetBlockId(): string {
+        return 'item-' + this.playerItemId + '-' + (this.inFief ? 1 : 0);
+    }
+
     GetInfoHTML(): string {
         return `
-            <div class="item" id="item-${this.playerItemId}" data-player-item-id="${this.playerItemId}" data-loom="${this.loomLevel}" data-name="${this.name}" data-category="" data-id="${this.GetItemId()}" style="${this.GetColor()}">
+            <div class="item" id="${this.GetBlockId()}" data-player-item-id="${this.GetBlockId()}" data-loom="${this.loomLevel}" data-name="${this.name}" data-category="" data-id="${this.GetItemId()}" style="${this.GetColor()}">
                 <div class="header">
                     <img width="70" height="70" src="${this.GetImage()}" rel="${this.GetTooltip()}" title="${this.name}" class="itemstats">
                     <div class="name">${this.name}</div>
@@ -123,7 +130,7 @@ class Item {
     }
 
     GetCountInput(): HTMLInputElement {
-        return this.input != null ? this.input : this.input = <HTMLInputElement>document.getElementById('item-' + this.playerItemId).querySelector('.item-count-input');
+        return this.input != null ? this.input : this.input = <HTMLInputElement>document.querySelector('#' + this.GetBlockId() + ' .item-count-input');
     }
 
     UpdateInput(input: HTMLInputElement, value: string) {
@@ -206,18 +213,22 @@ class Item {
 
     UpdateCategoryCount(diff: number) {
         if(this.category) {
-            this.category.removeCount = (this.category.removeCount - diff);
+            if(this.inFief) {
+                this.category.addCount = (this.category.addCount + diff);
+            } else {
+                this.category.removeCount = (this.category.removeCount - diff);
+            }
             this.category.UpdateElements();
         }
     }
 
     Show() {
-        document.getElementById('item-' + this.playerItemId).style.display = '';
+        document.getElementById(this.GetBlockId()).style.display = '';
         this.displayed = true;
     }
 
     Hide() {
-        document.getElementById('item-' + this.playerItemId).style.display = 'none';
+        document.getElementById(this.GetBlockId()).style.display = 'none';
         this.displayed = false;
     }
 

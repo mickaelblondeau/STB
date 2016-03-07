@@ -5,13 +5,12 @@ enum SpecialItems {
     GOLD = -1,
     TROOPS = -2,
     UNKNOWN = -3,
+    TRADE = -4
 }
 
 class ArmouryManager {
     static GREEN_QUALITY = 'rgba(0, 100, 0, 0.2)';
     static RED_QUALITY = 'rgba(100, 0, 0, 0.2)';
-    static LIGHTEST_GREY = 'rgba(0, 0, 0, 0.2)';
-    static LIGHT_GREY = 'rgba(0, 0, 0, 0.5)';
     static TROOP_ICON = 'http://i.imgur.com/lzkgfYe.png';
     static GOLD_ICON = 'http://i.imgur.com/GsvcGtg.png';
     static TRADE_ICON = 'http://i.imgur.com/o5WoZPb.png';
@@ -24,29 +23,55 @@ class ArmouryManager {
     static Start() {
         ArmouryManager.InitCategories();
         ArmouryManager.FillCategoriesWithLocalData();
+
         if(isOnPage('news.php?inv')) {
             ArmouryManager.ScanItems();
         }
+
         if(isOnPage('news.php?info') || isOnPage('news.php?info&msg=') || isOnPage('news.php?msg=')) {
-            ArmouryManager.CreateContainer();
+            debugFief();
+
+            let forms = document.querySelectorAll('#info_page form');
+            for(let i = 0; i < forms.length; ++i) {
+                if(i == 1) {
+                    forms[i].setAttribute('id', 'stb-char-inventory');
+                    ArmouryManager.CreateContainer(false);
+                }
+                if(i == 2) {
+                    forms[i].setAttribute('id', 'stb-fief-inventory');
+                    ArmouryManager.CreateContainer(true);
+                }
+            }
 
             ArmouryManager.LoadCategoryBlock();
             ArmouryManager.LoadItems();
 
-            if(ArmouryManager.simulation) {
-                ArmouryManager.UpdateItemSimulationPage();
-            } else {
-                ArmouryManager.UpdateItemPage();
+            for(let i = 0; i < forms.length; ++i) {
+                if(i == 1) {
+                    if(ArmouryManager.simulation) {
+                        ArmouryManager.UpdateItemSimulationPage(false);
+                    } else {
+                        ArmouryManager.UpdateItemPage(false);
+                    }
+                }
+                if(i == 2) {
+                    if(ArmouryManager.simulation) {
+                        ArmouryManager.UpdateItemSimulationPage(true);
+                    } else {
+                        ArmouryManager.UpdateItemPage(true);
+                    }
+                }
             }
+
+            ArmouryManager.UpdateCategories();
 
             ArmouryManager.AddHelpers();
             ArmouryManager.AddFilters();
             ArmouryManager.AddPresets();
 
             ArmouryManager.EventsListeners();
-
-            // fief owner ?
         }
+
         if(isOnPage('news.php?buy')) {
             let localCategories = JSON.parse(localStorage.getItem('stb3_categories') || '{}');
 
@@ -82,13 +107,16 @@ class ArmouryManager {
         }
     }
 
-    static CreateContainer() {
-        let div = document.createElement('div');
-        div.setAttribute('id', 'stb-container');
+    static CreateContainer(isFief: boolean) {
+        let id = isFief ? 'stb-fief-container' : 'stb-char-container';
+        let parent = isFief ? '#stb-fief-inventory' : '#stb-char-inventory';
 
-        let table = document.querySelector('table[name=transfertable]');
+        let div = document.createElement('div');
+        div.setAttribute('id', id);
+
+        let table = document.querySelector(parent + ' table[name=transfertable]');
         if(table) {
-            document.querySelector('table[name=transfertable] tbody').appendChild(div);
+            document.querySelector(parent + ' table[name=transfertable] tbody').appendChild(div);
         } else {
             document.querySelector('#info_page fieldset form').appendChild(div);
             ArmouryManager.simulation = true;
@@ -132,7 +160,7 @@ class ArmouryManager {
         div.innerHTML = `
             <h4>Categories</h4>
         `;
-        document.getElementById('stb-container').appendChild(div);
+        document.getElementById('stb-char-container').appendChild(div);
 
         for(let category of ArmouryManager.categories) {
             document.getElementById('stb-categories').appendChild(category.GetInfoElement());
@@ -180,20 +208,31 @@ class ArmouryManager {
         let itemsJSON = localStorage.getItem('stb3_items') || '[]';
         let items = JSON.parse(itemsJSON);
         for(let item of items) {
-            ArmouryManager.items.push(new Item(item.i, item.p, item.l, item.n, item.c));
+            if(Item.Exist(item.p)) {
+                ArmouryManager.items.push(new Item(item.i, item.p, item.l, item.n, item.c));
+            }
         }
-        ArmouryManager.UpdateCategories();
     }
 
-    static UpdateItemPage() {
-        let div = document.createElement('div');
-        div.setAttribute('id', 'stb-items');
-        document.getElementById('stb-container').appendChild(div);
+    static UpdateItemPage(isFief: boolean) {
+        let divId = isFief ? 'stb-fief-items' : 'stb-char-items';
+        let containerId = isFief ? 'stb-fief-container' : 'stb-char-container';
+        let parent = isFief ? '#stb-fief-inventory' : '#stb-char-inventory';
 
-        let items = document.querySelectorAll('table[name=transfertable] tr:not(:first-child)');
+        let div = document.createElement('div');
+        div.setAttribute('id', divId);
+        document.getElementById(containerId).appendChild(div);
+
+        let items = document.querySelectorAll(parent + ' table[name=transfertable] tr:not(:first-child)');
         for(let i = 0; i < items.length; ++i) {
-            let id = items[i].querySelector('.in').getAttribute('id').split('hero_transfer_item_')[1];
-            let count = parseInt(items[i].querySelector('.useall_hero').textContent.split(' (all)')[0]);
+            let id = items[i].querySelector('.in').getAttribute('name').split('transfer[')[1].split(']')[0];
+
+            if(items[i].querySelector('.useall_hero')) {
+                var count = parseInt(items[i].querySelector('.useall_hero').textContent.split(' (all)')[0]);
+            } else {
+                var count = parseInt(items[i].querySelector('.useall_loc').textContent.split(' (all)')[0]);
+            }
+
             let itemId: number;
             if(id == 'gold') {
                 itemId = SpecialItems.GOLD;
@@ -202,34 +241,46 @@ class ArmouryManager {
             } else {
                 itemId = parseInt(id);
             }
-            let item = ArmouryManager.FindItemById(itemId);
+            let item = ArmouryManager.FindItemById('item-' + itemId + '-' + (isFief ? 1 : 0));
             if(item) {
-                item.count = count;
-                document.getElementById('stb-items').appendChild(item.GetInfoElement());
+                item.updateCategory(count, isFief);
+                document.getElementById(divId).appendChild(item.GetInfoElement());
             } else {
-                let loom = items[i].querySelector('.mergeitemsInfo').textContent;
-                let newItem = new Item(itemId, SpecialItems.UNKNOWN, parseInt(loom), items[i].querySelector('b').textContent.replace(loom + ' ', '').replace(':', ''), count);
-                ArmouryManager.items.push(newItem);
-                document.getElementById('stb-items').appendChild(newItem.GetInfoElement());
+                let loomContainer = items[i].querySelector('.mergeitemsInfo');
+                if(loomContainer) {
+                    let loom = items[i].querySelector('.mergeitemsInfo').textContent;
+                    let newItem = new Item(SpecialItems.UNKNOWN, itemId, parseInt(loom), items[i].querySelector('b').textContent.replace(loom + ' ', '').replace(':', ''), count);
+                    newItem.updateCategory(count, isFief);
+                    ArmouryManager.items.push(newItem);
+                    document.getElementById(divId).appendChild(newItem.GetInfoElement());
+                } else {
+                    let newItem = new Item(SpecialItems.TRADE, itemId, 0, items[i].querySelector('b').textContent.replace(':', ''), count);
+                    newItem.updateCategory(count, isFief);
+                    ArmouryManager.items.push(newItem);
+                    document.getElementById(divId).appendChild(newItem.GetInfoElement());
+                }
             }
             items[i].remove();
         }
-        document.querySelector('table[name=transfertable] tr').remove();
+        document.querySelector(parent + ' table[name=transfertable] tr').remove();
     }
 
-    static UpdateItemSimulationPage() {
+    static UpdateItemSimulationPage(isFief: boolean) {
+        let divId = isFief ? 'stb-fief-items' : 'stb-char-items';
+        let containerId = isFief ? 'stb-fief-container' : 'stb-char-container';
+
         let div = document.createElement('div');
-        div.setAttribute('id', 'stb-items');
-        document.getElementById('stb-container').appendChild(div);
+        div.setAttribute('id', divId);
+        document.getElementById(containerId).appendChild(div);
 
         for(let item of ArmouryManager.items) {
-            document.getElementById('stb-items').appendChild(item.GetInfoElement());
+            document.getElementById(divId).appendChild(item.GetInfoElement());
         }
     }
 
-    static FindItemById(playerItemId: number): Item {
+    static FindItemById(playerItemId: string): Item {
         for(let item of ArmouryManager.items) {
-            if(item.playerItemId == playerItemId) {
+            if(item.GetBlockId() == playerItemId) {
                 return item;
             }
         }
@@ -248,7 +299,7 @@ class ArmouryManager {
             <input type="button" id="stb_split_button" value="Split" />
         `;
 
-        let node = document.getElementById('stb-items');
+        let node = document.getElementById('stb-char-items');
         node.parentNode.insertBefore(div, node);
 
         document.getElementById('stb_select_button').addEventListener('click', function(event) {
@@ -310,7 +361,7 @@ class ArmouryManager {
             <input type="text" id="stb_text_filter" placeholder="Search for items" />
         `;
 
-        let node = document.getElementById('stb-items');
+        let node = document.getElementById('stb-char-items');
         node.parentNode.insertBefore(div, node);
 
         for(let category of ArmouryManager.categories) {
@@ -368,7 +419,7 @@ class ArmouryManager {
             <input type="button" id="stb_preset_save" value="Save" />
         `;
 
-        let node = document.getElementById('stb-items');
+        let node = document.getElementById('stb-char-items');
         node.parentNode.insertBefore(div, node);
 
         let presets = ArmouryManager.LoadPresets();
@@ -458,7 +509,7 @@ class ArmouryManager {
             let result = results[i];
             let itemDiv = document.querySelector('.item[data-id="' + result.i + '"].item[data-loom="' + result.l + '"]');
             (<HTMLInputElement>itemDiv.querySelector('.item-count-input')).value = result.a;
-            let id = parseInt(itemDiv.getAttribute('data-player-item-id'));
+            let id = itemDiv.getAttribute('data-player-item-id');
             let item = ArmouryManager.FindItemById(id);
             item.ChangeValue();
         }
@@ -468,7 +519,7 @@ class ArmouryManager {
         let minusButtons = document.querySelectorAll('.remove-count-from-item');
         for(let i = 0; i < minusButtons.length; ++i) {
             minusButtons[i].addEventListener('click', function(event) {
-                let id = parseInt(this.parentElement.parentElement.parentElement.parentElement.getAttribute('data-player-item-id'));
+                let id = this.parentElement.parentElement.parentElement.parentElement.getAttribute('data-player-item-id');
                 let item = ArmouryManager.FindItemById(id);
                 item.SubCount();
             });
@@ -477,7 +528,7 @@ class ArmouryManager {
         let plusButtons = document.querySelectorAll('.add-count-to-item');
         for(let i = 0; i < plusButtons.length; ++i) {
             plusButtons[i].addEventListener('click', function(event) {
-                let id = parseInt(this.parentElement.parentElement.parentElement.parentElement.getAttribute('data-player-item-id'));
+                let id = this.parentElement.parentElement.parentElement.parentElement.getAttribute('data-player-item-id');
                 let item = ArmouryManager.FindItemById(id);
                 item.AddCount();
             });
@@ -487,7 +538,7 @@ class ArmouryManager {
         for(let i = 0; i < totalButtons.length; ++i) {
             totalButtons[i].addEventListener('click', function(event) {
                 event.preventDefault();
-                let id = parseInt(this.parentElement.parentElement.parentElement.getAttribute('data-player-item-id'));
+                let id = this.parentElement.parentElement.parentElement.getAttribute('data-player-item-id');
                 let item = ArmouryManager.FindItemById(id);
                 item.SetTotal();
             });
@@ -496,7 +547,7 @@ class ArmouryManager {
         let inputs = document.querySelectorAll('.item-count-input');
         for(let i = 0; i < inputs.length; ++i) {
             inputs[i].addEventListener('change', function(event) {
-                let id = parseInt(this.parentElement.parentElement.parentElement.getAttribute('data-player-item-id'));
+                let id = this.parentElement.parentElement.parentElement.getAttribute('data-player-item-id');
                 let item = ArmouryManager.FindItemById(id);
                 item.ChangeValue();
             });
