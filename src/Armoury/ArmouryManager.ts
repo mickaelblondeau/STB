@@ -29,9 +29,9 @@ class ArmouryManager {
         }
 
         if(isOnPage('news.php?info') || isOnPage('news.php?info&msg=') || isOnPage('news.php?msg=')) {
-            debugFief();
+            //debugFief();
 
-            let forms = document.querySelectorAll('#info_page form');
+            let forms = document.querySelectorAll('#info_page form[action="news.php?transfer"]');
             for(let i = 0; i < forms.length; ++i) {
                 if(i == 1) {
                     forms[i].setAttribute('id', 'stb-char-inventory');
@@ -60,6 +60,13 @@ class ArmouryManager {
                     } else {
                         ArmouryManager.UpdateItemPage(true);
                     }
+                }
+            }
+
+            for(let i = 0; i < ArmouryManager.items.length; ++i) {
+                let item = ArmouryManager.items[i];
+                if(!item.Exist()) {
+                    item.active = false;
                 }
             }
 
@@ -206,20 +213,20 @@ class ArmouryManager {
         ArmouryManager.items.push(new Item(SpecialItems.GOLD, SpecialItems.GOLD, 0, 'Gold', parseInt(document.querySelector('#sub > .block > div').textContent.split('Gold: ')[1].split("\n")[0])));
         ArmouryManager.items.push(new Item(SpecialItems.TROOPS, SpecialItems.TROOPS, 0, 'Troops', parseInt(document.querySelector('#sub > .block > div').textContent.split('Troops: ')[1].split("\n")[0])));
 
-        let item = new Item(SpecialItems.GOLD, SpecialItems.GOLD, 0, 'Gold', parseInt(document.querySelector('#sub > .block > div').textContent.split('Gold: ')[1].split("\n")[0]));
-        item.inFief = true;
-        ArmouryManager.items.push(item);
+        if(document.getElementById('stb-fief-items') != null) {
+            let item = new Item(SpecialItems.GOLD, SpecialItems.GOLD, 0, 'Gold', parseInt(document.querySelector('#sub > .block > div').textContent.split('Gold: ')[1].split("\n")[0]));
+            item.inFief = true;
+            ArmouryManager.items.push(item);
 
-        item = new Item(SpecialItems.TROOPS, SpecialItems.TROOPS, 0, 'Troops', parseInt(document.querySelector('#sub > .block > div').textContent.split('Troops: ')[1].split("\n")[0]));
-        item.inFief = true;
-        ArmouryManager.items.push(item);
+            item = new Item(SpecialItems.TROOPS, SpecialItems.TROOPS, 0, 'Troops', parseInt(document.querySelector('#sub > .block > div').textContent.split('Troops: ')[1].split("\n")[0]));
+            item.inFief = true;
+            ArmouryManager.items.push(item);
+        }
 
         let itemsJSON = localStorage.getItem('stb3_items') || '[]';
         let items = JSON.parse(itemsJSON);
         for(let item of items) {
-            if(Item.Exist(item.p)) {
-                ArmouryManager.items.push(new Item(item.i, item.p, item.l, item.n, item.c));
-            }
+            ArmouryManager.items.push(new Item(item.i, item.p, item.l, item.n, item.c));
         }
     }
 
@@ -313,21 +320,21 @@ class ArmouryManager {
 
         document.getElementById('stb_select_button').addEventListener('click', function(event) {
             for(let item of ArmouryManager.items) {
-                if(item.IsFilterable() && !item.inFief) {
+                if(item.active && item.IsFilterable() && !item.inFief) {
                     item.SetTotal();
                 }
             }
         });
         document.getElementById('stb_unselect_button').addEventListener('click', function(event) {
             for(let item of ArmouryManager.items) {
-                if(item.IsFilterable() && !item.inFief) {
+                if(item.active && item.IsFilterable() && !item.inFief) {
                     item.SetEmpty();
                 }
             }
         });
         document.getElementById('stb_invert_button').addEventListener('click', function(event) {
             for(let item of ArmouryManager.items) {
-                if(item.IsFilterable() && !item.inFief) {
+                if(item.active && item.IsFilterable() && !item.inFief) {
                     item.Invert();
                 }
             }
@@ -335,16 +342,13 @@ class ArmouryManager {
         document.getElementById('stb_split_button').addEventListener('click', function(event) {
             let splitValue = parseInt((<HTMLInputElement>document.getElementById('stb_split_value')).value);
             for(let item of ArmouryManager.items) {
-                if(item.IsFilterable() && !item.inFief) {
+                if(item.active && item.IsFilterable() && !item.inFief) {
                     item.Split(splitValue);
                 }
             }
         });
 
-
-
-
-        let node = document.getElementById('stb-fief-items');
+        node = document.getElementById('stb-fief-items');
         if(node != null) {
             let div = document.createElement('div');
             div.setAttribute('id', 'stb-fief-helpers');
@@ -360,21 +364,21 @@ class ArmouryManager {
 
             document.getElementById('stb_fief_select_button').addEventListener('click', function(event) {
                 for(let item of ArmouryManager.items) {
-                    if(item.IsFilterable() && item.inFief) {
+                    if(item.active && item.IsFilterable() && item.inFief) {
                         item.SetTotal();
                     }
                 }
             });
             document.getElementById('stb_fief_unselect_button').addEventListener('click', function(event) {
                 for(let item of ArmouryManager.items) {
-                    if(item.IsFilterable() && item.inFief) {
+                    if(item.active && item.IsFilterable() && item.inFief) {
                         item.SetEmpty();
                     }
                 }
             });
             document.getElementById('stb_fief_invert_button').addEventListener('click', function(event) {
                 for(let item of ArmouryManager.items) {
-                    if(item.IsFilterable() && item.inFief) {
+                    if(item.active && item.IsFilterable() && item.inFief) {
                         item.Invert();
                     }
                 }
@@ -382,7 +386,7 @@ class ArmouryManager {
             document.getElementById('stb_fief_split_button').addEventListener('click', function(event) {
                 let splitValue = parseInt((<HTMLInputElement>document.getElementById('stb_fief_split_value')).value);
                 for(let item of ArmouryManager.items) {
-                    if(item.IsFilterable() && item.inFief) {
+                    if(item.active && item.IsFilterable() && item.inFief) {
                         item.Split(splitValue);
                     }
                 }
@@ -451,7 +455,9 @@ class ArmouryManager {
         let loomLevel = parseInt((<HTMLInputElement>document.getElementById('stb_loom_level_filter')).value);
         let search = (<HTMLInputElement>document.getElementById('stb_text_filter')).value;
         for(let item of ArmouryManager.items) {
-            item.UpdateVisibility(category, loomComparator, loomLevel, search);
+            if(item.active) {
+                item.UpdateVisibility(category, loomComparator, loomLevel, search);
+            }
         }
     }
 
@@ -568,8 +574,8 @@ class ArmouryManager {
             let id = result.f ? '#stb-fief-items' : '#stb-char-items';
             let itemDiv = document.querySelector(id + ' .item[data-id="' + result.i + '"].item[data-loom="' + result.l + '"]');
             (<HTMLInputElement>itemDiv.querySelector('.item-count-input')).value = result.a;
-            let id = itemDiv.getAttribute('data-player-item-id');
-            let item = ArmouryManager.FindItemById(id);
+            let blockId = itemDiv.getAttribute('data-player-item-id');
+            let item = ArmouryManager.FindItemById(blockId);
             item.ChangeValue();
         }
     }

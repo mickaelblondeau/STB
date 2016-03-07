@@ -9,6 +9,7 @@ class Item {
     previousValue: string = '0';
     displayed: boolean = true;
     inFief: boolean = false;
+    active: boolean = true;
 
     constructor(itemId: number, playerItemId: number, loomLevel: number, name: string, count: number) {
         this.itemId = itemId;
@@ -41,8 +42,8 @@ class Item {
         }
     }
 
-    static Exist(playerItemId: string): boolean {
-        return document.getElementById(playerItemId) != null;
+    Exist(): boolean {
+        return document.getElementById(this.GetBlockId()) != null;
     }
 
     IsFilterable(): boolean {
