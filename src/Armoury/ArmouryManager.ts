@@ -205,6 +205,15 @@ class ArmouryManager {
     static LoadItems() {
         ArmouryManager.items.push(new Item(SpecialItems.GOLD, SpecialItems.GOLD, 0, 'Gold', parseInt(document.querySelector('#sub > .block > div').textContent.split('Gold: ')[1].split("\n")[0])));
         ArmouryManager.items.push(new Item(SpecialItems.TROOPS, SpecialItems.TROOPS, 0, 'Troops', parseInt(document.querySelector('#sub > .block > div').textContent.split('Troops: ')[1].split("\n")[0])));
+
+        let item = new Item(SpecialItems.GOLD, SpecialItems.GOLD, 0, 'Gold', parseInt(document.querySelector('#sub > .block > div').textContent.split('Gold: ')[1].split("\n")[0]));
+        item.inFief = true;
+        ArmouryManager.items.push(item);
+
+        item = new Item(SpecialItems.TROOPS, SpecialItems.TROOPS, 0, 'Troops', parseInt(document.querySelector('#sub > .block > div').textContent.split('Troops: ')[1].split("\n")[0]));
+        item.inFief = true;
+        ArmouryManager.items.push(item);
+
         let itemsJSON = localStorage.getItem('stb3_items') || '[]';
         let items = JSON.parse(itemsJSON);
         for(let item of items) {
@@ -496,8 +505,9 @@ class ArmouryManager {
             let loomLevel = item.getAttribute('data-loom');
             let itemId = item.getAttribute('data-id');
             let amount = parseInt((<HTMLInputElement>item.querySelector('.item-count-input')).value);
+            let inFief = item.parentElement.getAttribute('id') == 'stb-char-items' ? 0 : 1;
             if(amount > 0) {
-                results.push({ i: itemId, l: loomLevel, a: amount });
+                results.push({ i: itemId, l: loomLevel, a: amount, f: inFief });
             }
         }
         return results;
@@ -507,7 +517,8 @@ class ArmouryManager {
         let results = JSON.parse(response);
         for(let i = 0; i < results.length; ++i) {
             let result = results[i];
-            let itemDiv = document.querySelector('.item[data-id="' + result.i + '"].item[data-loom="' + result.l + '"]');
+            let id = result.f ? '#stb-fief-items' : '#stb-char-items';
+            let itemDiv = document.querySelector(id + ' .item[data-id="' + result.i + '"].item[data-loom="' + result.l + '"]');
             (<HTMLInputElement>itemDiv.querySelector('.item-count-input')).value = result.a;
             let id = itemDiv.getAttribute('data-player-item-id');
             let item = ArmouryManager.FindItemById(id);

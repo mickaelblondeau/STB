@@ -26,14 +26,18 @@ class Item {
             for(let itemId of category.items) {
                 if(itemId == this.itemId) {
                     this.category = category;
-                    this.category.count += this.count;
+                    if(!this.inFief) {
+                        this.category.count += this.count;
+                    }
                     break;
                 }
             }
         }
         if(this.category == null && !this.IsSpecialItem()) {
             this.category = ArmouryManager.categories[0];
-            this.category.count += this.count;
+            if(!this.inFief) {
+                this.category.count += this.count;
+            }
         }
     }
 
