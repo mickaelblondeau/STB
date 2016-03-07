@@ -298,7 +298,7 @@ class ArmouryManager {
 
     static AddHelpers() {
         let div = document.createElement('div');
-        div.setAttribute('id', 'stb-helpers');
+        div.setAttribute('id', 'stb-char-helpers');
         div.innerHTML = `
             <h4>Helpers</h4>
             <input type="button" id="stb_select_button" value="Select All" />
@@ -313,21 +313,21 @@ class ArmouryManager {
 
         document.getElementById('stb_select_button').addEventListener('click', function(event) {
             for(let item of ArmouryManager.items) {
-                if(item.IsFilterable()) {
+                if(item.IsFilterable() && !item.inFief) {
                     item.SetTotal();
                 }
             }
         });
         document.getElementById('stb_unselect_button').addEventListener('click', function(event) {
             for(let item of ArmouryManager.items) {
-                if(item.IsFilterable()) {
+                if(item.IsFilterable() && !item.inFief) {
                     item.SetEmpty();
                 }
             }
         });
         document.getElementById('stb_invert_button').addEventListener('click', function(event) {
             for(let item of ArmouryManager.items) {
-                if(item.IsFilterable()) {
+                if(item.IsFilterable() && !item.inFief) {
                     item.Invert();
                 }
             }
@@ -335,11 +335,59 @@ class ArmouryManager {
         document.getElementById('stb_split_button').addEventListener('click', function(event) {
             let splitValue = parseInt((<HTMLInputElement>document.getElementById('stb_split_value')).value);
             for(let item of ArmouryManager.items) {
-                if(item.IsFilterable()) {
+                if(item.IsFilterable() && !item.inFief) {
                     item.Split(splitValue);
                 }
             }
         });
+
+
+
+
+        let node = document.getElementById('stb-fief-items');
+        if(node != null) {
+            let div = document.createElement('div');
+            div.setAttribute('id', 'stb-fief-helpers');
+            div.innerHTML = `
+            <h4>Helpers</h4>
+            <input type="button" id="stb_fief_select_button" value="Select All" />
+            <input type="button" id="stb_fief_unselect_button" value="Unselect All" />
+            <input type="button" id="stb_fief_invert_button" value="Invert selection" />
+            <input type="text" id="stb_fief_split_value" style="width: 50px" placeholder="Split %" />%
+            <input type="button" id="stb_fief_split_button" value="Split" />
+        `;
+            node.parentNode.insertBefore(div, node);
+
+            document.getElementById('stb_fief_select_button').addEventListener('click', function(event) {
+                for(let item of ArmouryManager.items) {
+                    if(item.IsFilterable() && item.inFief) {
+                        item.SetTotal();
+                    }
+                }
+            });
+            document.getElementById('stb_fief_unselect_button').addEventListener('click', function(event) {
+                for(let item of ArmouryManager.items) {
+                    if(item.IsFilterable() && item.inFief) {
+                        item.SetEmpty();
+                    }
+                }
+            });
+            document.getElementById('stb_fief_invert_button').addEventListener('click', function(event) {
+                for(let item of ArmouryManager.items) {
+                    if(item.IsFilterable() && item.inFief) {
+                        item.Invert();
+                    }
+                }
+            });
+            document.getElementById('stb_fief_split_button').addEventListener('click', function(event) {
+                let splitValue = parseInt((<HTMLInputElement>document.getElementById('stb_fief_split_value')).value);
+                for(let item of ArmouryManager.items) {
+                    if(item.IsFilterable() && item.inFief) {
+                        item.Split(splitValue);
+                    }
+                }
+            });
+        }
     }
 
     static AddFilters() {
