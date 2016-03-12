@@ -5,7 +5,7 @@ var watch = require('gulp-watch');
 var batch = require('gulp-batch');
  
 gulp.task('default', function() {
-	return gulp.src('src/**/*.ts')
+	gulp.src('src/**/*.ts')
 		.pipe(ts({
 			noImplicitAny: true,
 			removeComments: true,
@@ -22,6 +22,8 @@ gulp.task('default', function() {
 			''
 		].join('\n')))
 		.pipe(gulp.dest('../'));
+	return gulp.src('../STB3.user.js')
+		.pipe(gulp.dest('build'));
 });
 
 gulp.task('watch', function() {

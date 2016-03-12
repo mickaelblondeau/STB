@@ -10,11 +10,10 @@ class MapManager {
     static diplomacies: Array<any> = [];
     static factionId: number = 0;
     static tradeValues: Array<any> = [
-        { name: '+160% / +170%', size: 32, color: 'grey' },
-        { name: '-12% / +160%', size: 31, color: 'lime' },
-        { name: '-31% / -12%', size: 11, color: 'purple' },
-        { name: '-43% / -31%', size: 8.5, color: 'cyan' },
-        { name: '-50% / -43%', size: 5, color: 'blue' },
+        { name: '+250% / +350%', size: 80, color: 'red' },
+        { name: '+100% / +250%', size: 40, color: 'yellow' },
+        { name: '+0% / +100%', size: 25, color: 'lime' },
+        { name: '-50% / +0%', size: 13.75, color: 'blue' },
         { name: '-50%', size: 1.5, color: 'white' },
     ];
     static selectedFief: number = 0;
@@ -76,7 +75,7 @@ class MapManager {
 
             <b>Commercial Filter</b><br>
             ${MapManager.GetComercialFilters()}
-            ${MapManager.GetLegendLine('+170 / +oo', 'purple')}
+            ${MapManager.GetLegendLine('+350% / +400%', 'purple')}
         `;
         document.getElementById('main').appendChild(legend);
 
