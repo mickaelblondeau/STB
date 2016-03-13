@@ -890,7 +890,7 @@ var MapManager = (function () {
         var legend = document.createElement('div');
         legend.setAttribute('id', 'legend');
         legend.setAttribute('style', 'position:fixed; z-index:10; background:white; top:134px; padding:5px; border:1px solid black;');
-        legend.innerHTML = "\n            <b>Diplomatic Filter</b><br>\n            " + MapManager.GetLegendLine('You', 'rgb(0, 0, 255)') + "\n            " + MapManager.GetLegendLine('Allied', 'rgb(0, 255, 255)') + "\n            " + MapManager.GetLegendLine('Friendly', 'rgb(0, 255, 0)') + "\n            " + MapManager.GetLegendLine('Neutral', 'rgb(255, 255, 255)') + "\n            " + MapManager.GetLegendLine('Hostile', 'rgb(255, 127, 0)') + "\n            " + MapManager.GetLegendLine('At War', 'rgb(255, 0, 0)') + "\n\n            <b>Commercial Filter</b><br>\n            " + MapManager.GetComercialFilters() + "\n            " + MapManager.GetLegendLine('+250% / +400%', 'purple') + "\n        ";
+        legend.innerHTML = "\n            <b>Diplomatic Filter</b><br>\n            " + MapManager.GetLegendLine('You', 'rgb(0, 0, 255)') + "\n            " + MapManager.GetLegendLine('Allied', 'rgb(0, 255, 255)') + "\n            " + MapManager.GetLegendLine('Friendly', 'rgb(0, 255, 0)') + "\n            " + MapManager.GetLegendLine('Neutral', 'rgb(255, 255, 255)') + "\n            " + MapManager.GetLegendLine('Hostile', 'rgb(255, 127, 0)') + "\n            " + MapManager.GetLegendLine('At War', 'rgb(255, 0, 0)') + "\n\n            <b>Commercial Filter</b><br>\n            " + MapManager.GetComercialFilters() + "\n        ";
         document.getElementById('main').appendChild(legend);
         var menu = document.createElement('div');
         menu.setAttribute('id', 'mapOptions');
@@ -1073,7 +1073,9 @@ var MapManager = (function () {
                 var style = window.getComputedStyle(this);
                 for (var _i = 0, _a = MapManager.tradeValues; _i < _a.length; _i++) {
                     var trade = _a[_i];
-                    MapManager.AddTradeCircle(parseInt(style.left) / MapManager.scale, parseInt(style.top) / MapManager.scale, trade.size, trade.color);
+                    if (MapManager.scale != 0) {
+                        MapManager.AddTradeCircle(parseInt(style.left) / MapManager.scale, parseInt(style.top) / MapManager.scale, trade.size, trade.color);
+                    }
                 }
                 MapManager.currentWidth = 0;
                 MapManager.CheckScale();
@@ -1108,20 +1110,22 @@ var MapManager = (function () {
         }
     };
     MapManager.AddTradeCircle = function (x, y, size, color) {
-        var pixelPerKm = 40;
-        DrawCircle(x.toString(), y.toString(), (size * pixelPerKm).toString(), 'black', '2', color);
+        DrawCircle(x.toString(), y.toString(), (size * MapManager.pixelPerKm).toString(), 'black', '2', color);
     };
     MapManager.width = 5900;
     MapManager.currentWidth = 5900;
     MapManager.scale = 1;
+    MapManager.pixelPerKm = 40;
     MapManager.fiefs = [];
     MapManager.colors = [];
     MapManager.diplomacies = [];
     MapManager.factionId = 0;
     MapManager.tradeValues = [
-        { name: '+100% / +250%', size: 40, color: 'red' },
-        { name: '+0% / +100%', size: 25, color: 'yellow' },
-        { name: '-50% / +0%', size: 13.75, color: 'lime' },
+        { name: '+350% / +400%', size: 0, color: 'purple' },
+        { name: '+250% / +350%', size: 80, color: 'red' },
+        { name: '+100% / +250%', size: 40, color: 'yellow' },
+        { name: '+0% / +100%', size: 25, color: 'lime' },
+        { name: '-50% / +0%', size: 13.75, color: 'blue' },
         { name: '-50%', size: 1.5, color: 'white' },
     ];
     MapManager.selectedFief = 0;

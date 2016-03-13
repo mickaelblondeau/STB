@@ -29,8 +29,6 @@ class ArmouryManager {
         }
 
         if(isOnPage('news.php?info') || isOnPage('news.php?info&msg=') || isOnPage('news.php?msg=')) {
-            //debugFief();
-
             let forms = document.querySelectorAll('#info_page form[action="news.php?transfer"]');
             for(let i = 0; i < forms.length; ++i) {
                 if(i == 1) {
@@ -188,15 +186,18 @@ class ArmouryManager {
     static ScanItems() {
         let items = document.querySelectorAll('#inv_page .item');
         for(let i = 0; i < items.length; ++i) {
-            let currentItem = items[i];
-            let itemName = currentItem.querySelector('.header .name').textContent;
-            let rel = items[i].querySelector('.itemstats').getAttribute('rel').split('itemstats.php?i=')[1];
-            let itemId = parseInt(rel.split('&m=')[0]);
-            let loomLevel = parseInt(rel.split('&m=')[1]);
-            let playerItemId = parseInt(items[i].querySelector('.itemvisibility ').getAttribute('name').split('itemvisibility[')[1].split(']')[0]);
-            let count = parseInt(items[i].querySelector('.desc').textContent.split('Number: ')[1].split("\n")[0]);
-            let item = new Item(itemId, playerItemId, loomLevel, itemName, count);
-            ArmouryManager.items.push(item);
+            let itemStats = items[i].querySelector('.itemstats');
+            if(itemStats) {
+                let currentItem = items[i];
+                let itemName = currentItem.querySelector('.header .name').textContent;
+                let rel = itemStats.getAttribute('rel').split('itemstats.php?i=')[1];
+                let itemId = parseInt(rel.split('&m=')[0]);
+                let loomLevel = parseInt(rel.split('&m=')[1]);
+                let playerItemId = parseInt(items[i].querySelector('.itemvisibility ').getAttribute('name').split('itemvisibility[')[1].split(']')[0]);
+                let count = parseInt(items[i].querySelector('.desc').textContent.split('Number: ')[1].split("\n")[0]);
+                let item = new Item(itemId, playerItemId, loomLevel, itemName, count);
+                ArmouryManager.items.push(item);
+            }
         }
         ArmouryManager.SaveItems();
     }

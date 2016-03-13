@@ -5,11 +5,13 @@ class MapManager {
     static width: number = 5900;
     static currentWidth: number = 5900;
     static scale: number = 1;
+    static pixelPerKm: number = 40;
     static fiefs: Array<any> = [];
     static colors: Array<any> = [];
     static diplomacies: Array<any> = [];
     static factionId: number = 0;
     static tradeValues: Array<any> = [
+        { name: '+350% / +400%', size: 0, color: 'purple' },
         { name: '+250% / +350%', size: 80, color: 'red' },
         { name: '+100% / +250%', size: 40, color: 'yellow' },
         { name: '+0% / +100%', size: 25, color: 'lime' },
@@ -75,7 +77,6 @@ class MapManager {
 
             <b>Commercial Filter</b><br>
             ${MapManager.GetComercialFilters()}
-            ${MapManager.GetLegendLine('+350% / +400%', 'purple')}
         `;
         document.getElementById('main').appendChild(legend);
 
@@ -324,7 +325,9 @@ class MapManager {
                 let style = window.getComputedStyle(this);
 
                 for(let trade of MapManager.tradeValues) {
-                    MapManager.AddTradeCircle(parseInt(style.left) / MapManager.scale, parseInt(style.top) / MapManager.scale, trade.size, trade.color);
+                    if(MapManager.scale != 0) {
+                        MapManager.AddTradeCircle(parseInt(style.left) / MapManager.scale, parseInt(style.top) / MapManager.scale, trade.size, trade.color);
+                    }
                 }
 
                 MapManager.currentWidth = 0;
@@ -365,7 +368,6 @@ class MapManager {
     }
 
     static AddTradeCircle(x: number, y: number, size: number, color: string) {
-        let pixelPerKm = 40;
-        DrawCircle(x.toString(), y.toString(), (size * pixelPerKm).toString(), 'black', '2', color);
+        DrawCircle(x.toString(), y.toString(), (size * MapManager.pixelPerKm).toString(), 'black', '2', color);
     }
 }
