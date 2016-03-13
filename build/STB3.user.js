@@ -461,7 +461,7 @@ var ArmouryManager = (function () {
     ArmouryManager.LoadItems = function () {
         ArmouryManager.items.push(new Item(SpecialItems.GOLD, SpecialItems.GOLD, 0, 'Gold', parseInt(document.querySelector('#sub > .block > div').textContent.split('Gold: ')[1].split("\n")[0])));
         ArmouryManager.items.push(new Item(SpecialItems.TROOPS, SpecialItems.TROOPS, 0, 'Troops', parseInt(document.querySelector('#sub > .block > div').textContent.split('Troops: ')[1].split("\n")[0])));
-        if (document.getElementById('stb-fief-items') != null) {
+        if (document.getElementById('stb-fief-inventory') != null) {
             var item = new Item(SpecialItems.GOLD, SpecialItems.GOLD, 0, 'Gold', parseInt(document.querySelector('#sub > .block > div').textContent.split('Gold: ')[1].split("\n")[0]));
             item.inFief = true;
             ArmouryManager.items.push(item);
