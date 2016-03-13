@@ -189,7 +189,7 @@ class MapManager {
         for(let data of mapData) {
             var line = '';
             for(let i in data.list) {
-                if(i == 0)
+                if(parseInt(i) == 0)
                     line += 'M' + data.list[i].x + ' ' + data.list[i].y;
                 else
                     line += ' L' + data.list[i].x + ' ' + data.list[i].y;
