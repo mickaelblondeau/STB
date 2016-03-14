@@ -90,6 +90,16 @@ class Item {
         }
     }
 
+    GetPlayerItemId(): string {
+        if(this.playerItemId == SpecialItems.GOLD) {
+            return 'gold';
+        } else if(this.playerItemId == SpecialItems.TROOPS) {
+            return 'troops';
+        } else {
+            return this.playerItemId.toString();
+        }
+    }
+
     GetColor(): string {
         if(this.loomLevel > 0) {
             return 'background: ' + ArmouryManager.GREEN_QUALITY;
@@ -116,7 +126,7 @@ class Item {
                         <a class="abutton">
                             <img src="img/ic_minus.png" style="vertical-align:middle" class="remove-count-from-item">
                         </a>
-                        <input class="in item-count-input" id="hero_transfer_item_${this.playerItemId}" name="transfer[${this.playerItemId}]" value="0" data-max="${this.count}">
+                        <input class="in item-count-input" id="hero_transfer_item_${this.playerItemId}" name="transfer[${this.GetPlayerItemId()}]" value="0" data-max="${this.count}">
                         <a class="abutton">
                             <img src="img/ic_plus.png" style="vertical-align:middle" class="add-count-to-item">
                         </a>
