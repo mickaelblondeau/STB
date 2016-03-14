@@ -830,7 +830,7 @@ function AddToGroup(line, id, group) {
     path.setAttributeNS(null, 'class', id);
     document.getElementById(group + '_2').appendChild(path);
 }
-function DrawCircle(x, y, r, stroke, width, fill) {
+function DrawCircle(x, y, r, stroke, width, fill, name) {
     var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     circle.setAttributeNS(null, 'cx', x);
     circle.setAttributeNS(null, 'cy', y);
@@ -838,7 +838,7 @@ function DrawCircle(x, y, r, stroke, width, fill) {
     circle.setAttributeNS(null, 'stroke', stroke);
     circle.setAttributeNS(null, 'stroke-width', width);
     circle.setAttributeNS(null, 'fill', fill);
-    document.getElementById("tradeSVG").appendChild(circle);
+    document.getElementById(name).appendChild(circle);
 }
 function DrawCube() {
     var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
@@ -848,6 +848,17 @@ function DrawCube() {
     rect.setAttributeNS(null, 'height', '100%');
     rect.setAttributeNS(null, 'fill', 'purple');
     document.getElementById('tradeSVG').appendChild(rect);
+}
+function DrawText(x, y, size, color, text) {
+    var rect = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    rect.setAttributeNS(null, 'x', x);
+    rect.setAttributeNS(null, 'y', y);
+    rect.setAttributeNS(null, 'fill', color);
+    rect.setAttributeNS(null, 'font-size', size);
+    rect.setAttributeNS(null, 'text-anchor', 'middle');
+    rect.setAttributeNS(null, 'dy', '80');
+    rect.textContent = text;
+    document.getElementById('tradeInfoSVG').appendChild(rect);
 }
 var MapManager = (function () {
     function MapManager() {
@@ -890,6 +901,7 @@ var MapManager = (function () {
         CreateSVG('factionSVG', 'position:absolute; z-index:1; display:none;');
         CreateSVG('diploSVG', 'position:absolute; z-index:1; display:none;');
         CreateSVG('tradeSVG', 'position:absolute; z-index:1; display:none; opacity: 0.5;');
+        CreateSVG('tradeInfoSVG', 'position:absolute; z-index:1; display:none;');
         var legend = document.createElement('div');
         legend.setAttribute('id', 'legend');
         legend.setAttribute('style', 'position:fixed; z-index:10; background:white; top:134px; padding:5px; border:1px solid black;');
@@ -898,7 +910,7 @@ var MapManager = (function () {
         var menu = document.createElement('div');
         menu.setAttribute('id', 'mapOptions');
         menu.setAttribute('class', 'block');
-        menu.innerHTML = "\n            <div style='margin-left:10px; margin-right:10px;'>\n                <h3>Strategus Tool Belt's Map</h3>\n                <div style='clear:both'></div>\n                <div class='options'>\n                    <h4>Map filters</h4>\n                    <input type=\"radio\" name=\"mapType\" value=\"factionSVG\">Faction<br>\n                    <input type=\"radio\" name=\"mapType\" value=\"diploSVG\">Diplomatic<br>\n                    <input type=\"radio\" name=\"mapType\" value=\"tradeSVG\">Trade Zone<br>\n                    <input type=\"radio\" name=\"mapType\" value=\"\">None<br>\n\n                    <h4>Default filter</h4>\n                    <select id=\"defaultFilter\">\n                        <option value=\"factionSVG\">Faction</option>\n                        <option value=\"diploSVG\">Diplomatic</option>\n                        <option value=\"tradeSVG\">Trade Zone</option>\n                        <option value=\"\">None</option>\n                    </select>\n\n                    <div id=\"diplomaticOptions\" style=\"display:none\">\n                        <br><span style=\"font-weight:bold;\">Change diplomacy</span><br>\n                        <div id=\"inputs\">\n                            <input type=\"radio\" name=\"diploType\" value=\"A\">Allied<br>\n                            <input type=\"radio\" name=\"diploType\" value=\"F\">Friendly<br>\n                            <input type=\"radio\" name=\"diploType\" value=\"N\">Neutral<br>\n                            <input type=\"radio\" name=\"diploType\" value=\"H\">Hostile<br>\n                            <input type=\"radio\" name=\"diploType\" value=\"W\">At War\n                        </div>\n                    </div>\n\n                    <h4>Import - Export Diplomatic settings</h4>\n                    <input type=\"text\" id=\"diploExport\" placeholder=\"Exported data will appear here\" />\n                    <button id=\"exportDiplo\">Export</button><br>\n                    <input type=\"text\" id=\"diploImport\" placeholder=\"Place data to import here\" />\n                    <button id=\"importDiplo\">Import</button><br>\n                    <button id=\"clearDiplo\">Clear diplomatic information</button>\n                </div>\n            </div>\n        ";
+        menu.innerHTML = "\n            <div style='margin-left:10px; margin-right:10px;'>\n                <h3>Strategus Tool Belt's Map</h3>\n                <div style='clear:both'></div>\n                <div class='options'>\n                    <h4>Map filters</h4>\n                    <input type=\"radio\" name=\"mapType\" value=\"factionSVG\">Faction<br>\n                    <input type=\"radio\" name=\"mapType\" value=\"diploSVG\">Diplomatic<br>\n                    <input type=\"radio\" name=\"mapType\" value=\"tradeSVG\">Trade Zone<br>\n                    <input type=\"radio\" name=\"mapType\" value=\"tradeInfoSVG\">Trade Potential<br>\n                    <input type=\"radio\" name=\"mapType\" value=\"\">None<br>\n\n                    <h4>Default filter</h4>\n                    <select id=\"defaultFilter\">\n                        <option value=\"factionSVG\">Faction</option>\n                        <option value=\"diploSVG\">Diplomatic</option>\n                        <option value=\"tradeSVG\">Trade Zone</option>\n                        <option value=\"tradeInfoSVG\">Trade Potential</option>\n                        <option value=\"\">None</option>\n                    </select>\n\n                    <div id=\"diplomaticOptions\" style=\"display:none\">\n                        <br><span style=\"font-weight:bold;\">Change diplomacy</span><br>\n                        <div id=\"inputs\">\n                            <input type=\"radio\" name=\"diploType\" value=\"A\">Allied<br>\n                            <input type=\"radio\" name=\"diploType\" value=\"F\">Friendly<br>\n                            <input type=\"radio\" name=\"diploType\" value=\"N\">Neutral<br>\n                            <input type=\"radio\" name=\"diploType\" value=\"H\">Hostile<br>\n                            <input type=\"radio\" name=\"diploType\" value=\"W\">At War\n                        </div>\n                    </div>\n\n                    <h4>Import - Export Diplomatic settings</h4>\n                    <input type=\"text\" id=\"diploExport\" placeholder=\"Exported data will appear here\" />\n                    <button id=\"exportDiplo\">Export</button><br>\n                    <input type=\"text\" id=\"diploImport\" placeholder=\"Place data to import here\" />\n                    <button id=\"importDiplo\">Import</button><br>\n                    <button id=\"clearDiplo\">Clear diplomatic information</button>\n                </div>\n            </div>\n        ";
         document.getElementById('menu').appendChild(menu);
         MapManager.LoadFiefs();
         MapManager.GetPlayerFaction();
@@ -914,12 +926,16 @@ var MapManager = (function () {
         var icons = document.querySelectorAll('#game .icon');
         for (var i = 0; i < icons.length; ++i) {
             var icon = icons[i];
+            var style = window.getComputedStyle(icon.firstElementChild);
             var fief = {
                 name: icon.firstElementChild.textContent,
-                color: window.getComputedStyle(icon.firstElementChild).color,
-                colorId: MapManager.RbgToId(window.getComputedStyle(icon.firstElementChild).color)
+                color: style.color,
+                colorId: MapManager.RbgToId(style.color)
             };
             MapManager.fiefs.push(fief);
+            style = window.getComputedStyle(icon);
+            DrawCircle(style.left.split('px')[0], style.top.split('px')[0], '100', 'rgba(0, 0, 0, 0.5)', '5', 'rgba(255, 0, 0, 0.5)', 'tradeInfoSVG');
+            DrawText(style.left.split('px')[0], style.top.split('px')[0], '32', 'black', '999');
             var colorExist = false;
             for (var _i = 0, _a = MapManager.colors; _i < _a.length; _i++) {
                 var color = _a[_i];
@@ -1007,6 +1023,7 @@ var MapManager = (function () {
                 MapManager.SetScale('path');
                 MapManager.SetScale('circle');
                 MapManager.SetScale('rect');
+                MapManager.SetScale('text');
                 document.getElementById('mapdraw').style.zIndex = '0';
             }
         }
@@ -1113,7 +1130,7 @@ var MapManager = (function () {
         }
     };
     MapManager.AddTradeCircle = function (x, y, size, color) {
-        DrawCircle(x.toString(), y.toString(), (size * MapManager.pixelPerKm).toString(), 'black', '2', color);
+        DrawCircle(x.toString(), y.toString(), (size * MapManager.pixelPerKm).toString(), 'black', '2', color, 'tradeSVG');
     };
     MapManager.width = 5900;
     MapManager.currentWidth = 5900;

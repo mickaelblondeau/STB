@@ -62,6 +62,7 @@ class MapManager {
         CreateSVG('factionSVG', 'position:absolute; z-index:1; display:none;');
         CreateSVG('diploSVG', 'position:absolute; z-index:1; display:none;');
         CreateSVG('tradeSVG', 'position:absolute; z-index:1; display:none; opacity: 0.5;');
+        CreateSVG('tradeInfoSVG', 'position:absolute; z-index:1; display:none;');
 
         let legend = document.createElement('div');
         legend.setAttribute('id', 'legend');
@@ -92,6 +93,7 @@ class MapManager {
                     <input type="radio" name="mapType" value="factionSVG">Faction<br>
                     <input type="radio" name="mapType" value="diploSVG">Diplomatic<br>
                     <input type="radio" name="mapType" value="tradeSVG">Trade Zone<br>
+                    <input type="radio" name="mapType" value="tradeInfoSVG">Trade Potential<br>
                     <input type="radio" name="mapType" value="">None<br>
 
                     <h4>Default filter</h4>
@@ -99,6 +101,7 @@ class MapManager {
                         <option value="factionSVG">Faction</option>
                         <option value="diploSVG">Diplomatic</option>
                         <option value="tradeSVG">Trade Zone</option>
+                        <option value="tradeInfoSVG">Trade Potential</option>
                         <option value="">None</option>
                     </select>
 
@@ -140,12 +143,17 @@ class MapManager {
         let icons = document.querySelectorAll('#game .icon');
         for(let i = 0; i < icons.length; ++i) {
             let icon = icons[i];
+            let style = window.getComputedStyle(icon.firstElementChild);
             let fief = {
                 name: icon.firstElementChild.textContent,
-                color: window.getComputedStyle(icon.firstElementChild).color,
-                colorId: MapManager.RbgToId(window.getComputedStyle(icon.firstElementChild).color)
+                color: style.color,
+                colorId: MapManager.RbgToId(style.color)
             };
             MapManager.fiefs.push(fief);
+
+            style = window.getComputedStyle(icon);
+            DrawCircle(style.left.split('px')[0], style.top.split('px')[0], '100', 'rgba(0, 0, 0, 0.5)', '5', 'rgba(255, 0, 0, 0.5)', 'tradeInfoSVG');
+            DrawText(style.left.split('px')[0], style.top.split('px')[0], '32', 'black', '999');
 
             var colorExist = false;
             for(let color of MapManager.colors) {
@@ -244,6 +252,7 @@ class MapManager {
                 MapManager.SetScale('path');
                 MapManager.SetScale('circle');
                 MapManager.SetScale('rect');
+                MapManager.SetScale('text');
                 document.getElementById('mapdraw').style.zIndex = '0';
             }
         }
@@ -368,6 +377,6 @@ class MapManager {
     }
 
     static AddTradeCircle(x: number, y: number, size: number, color: string) {
-        DrawCircle(x.toString(), y.toString(), (size * MapManager.pixelPerKm).toString(), 'black', '2', color);
+        DrawCircle(x.toString(), y.toString(), (size * MapManager.pixelPerKm).toString(), 'black', '2', color, 'tradeSVG');
     }
 }

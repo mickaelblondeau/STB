@@ -37,7 +37,7 @@ function AddToGroup(line: string , id: string , group: string) {
     document.getElementById(group + '_2').appendChild(path);
 }
 
-function DrawCircle(x: string, y: string, r: string, stroke: string, width: string, fill: string) {
+function DrawCircle(x: string, y: string, r: string, stroke: string, width: string, fill: string, name: string) {
     let circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     circle.setAttributeNS(null, 'cx', x);
     circle.setAttributeNS(null, 'cy', y);
@@ -45,7 +45,7 @@ function DrawCircle(x: string, y: string, r: string, stroke: string, width: stri
     circle.setAttributeNS(null, 'stroke', stroke);
     circle.setAttributeNS(null, 'stroke-width', width);
     circle.setAttributeNS(null, 'fill', fill);
-    document.getElementById("tradeSVG").appendChild(circle);
+    document.getElementById(name).appendChild(circle);
 }
 
 function DrawCube() {
@@ -56,4 +56,16 @@ function DrawCube() {
     rect.setAttributeNS(null, 'height', '100%');
     rect.setAttributeNS(null, 'fill', 'purple');
     document.getElementById('tradeSVG').appendChild(rect);
+}
+
+function DrawText(x: string, y: string, size: string, color: string, text: string) {
+    let rect = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    rect.setAttributeNS(null, 'x', x);
+    rect.setAttributeNS(null, 'y', y);
+    rect.setAttributeNS(null, 'fill', color);
+    rect.setAttributeNS(null, 'font-size', size);
+    rect.setAttributeNS(null, 'text-anchor', 'middle');
+    rect.setAttributeNS(null, 'dy', '80');
+    rect.textContent = text;
+    document.getElementById('tradeInfoSVG').appendChild(rect);
 }
