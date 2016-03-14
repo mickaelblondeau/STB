@@ -142,6 +142,17 @@ var Item = (function () {
             return this.itemId.toString();
         }
     };
+    Item.prototype.GetPlayerItemId = function () {
+        if (this.playerItemId == SpecialItems.GOLD) {
+            return 'gold';
+        }
+        else if (this.playerItemId == SpecialItems.TROOPS) {
+            return 'troops';
+        }
+        else {
+            return this.playerItemId.toString();
+        }
+    };
     Item.prototype.GetColor = function () {
         if (this.loomLevel > 0) {
             return 'background: ' + ArmouryManager.GREEN_QUALITY;
@@ -157,7 +168,7 @@ var Item = (function () {
         return 'item-' + this.playerItemId + '-' + (this.inFief ? 1 : 0);
     };
     Item.prototype.GetInfoHTML = function () {
-        return "\n            <div class=\"item\" id=\"" + this.GetBlockId() + "\" data-player-item-id=\"" + this.GetBlockId() + "\" data-loom=\"" + this.loomLevel + "\" data-name=\"" + this.name + "\" data-category=\"\" data-id=\"" + this.GetItemId() + "\" style=\"" + this.GetColor() + "\">\n                <div class=\"header\">\n                    <img width=\"70\" height=\"70\" src=\"" + this.GetImage() + "\" rel=\"" + this.GetTooltip() + "\" title=\"" + this.name + "\" class=\"itemstats\">\n                    <div class=\"name\">" + this.name + "</div>\n                </div>\n                <div class=\"desc\">\n                    <center>\n                        <a class=\"abutton\">\n                            <img src=\"img/ic_minus.png\" style=\"vertical-align:middle\" class=\"remove-count-from-item\">\n                        </a>\n                        <input class=\"in item-count-input\" id=\"hero_transfer_item_" + this.playerItemId + "\" name=\"transfer[" + this.playerItemId + "]\" value=\"0\" data-max=\"" + this.count + "\">\n                        <a class=\"abutton\">\n                            <img src=\"img/ic_plus.png\" style=\"vertical-align:middle\" class=\"add-count-to-item\">\n                        </a>\n                        <br>\n                        <a href=\"#\" class=\"set-total-count\">" + this.count + " (all)</a>\n                    </center>\n                </div>\n            </div>\n        ";
+        return "\n            <div class=\"item\" id=\"" + this.GetBlockId() + "\" data-player-item-id=\"" + this.GetBlockId() + "\" data-loom=\"" + this.loomLevel + "\" data-name=\"" + this.name + "\" data-category=\"\" data-id=\"" + this.GetItemId() + "\" style=\"" + this.GetColor() + "\">\n                <div class=\"header\">\n                    <img width=\"70\" height=\"70\" src=\"" + this.GetImage() + "\" rel=\"" + this.GetTooltip() + "\" title=\"" + this.name + "\" class=\"itemstats\">\n                    <div class=\"name\">" + this.name + "</div>\n                </div>\n                <div class=\"desc\">\n                    <center>\n                        <a class=\"abutton\">\n                            <img src=\"img/ic_minus.png\" style=\"vertical-align:middle\" class=\"remove-count-from-item\">\n                        </a>\n                        <input class=\"in item-count-input\" id=\"hero_transfer_item_" + this.playerItemId + "\" name=\"transfer[" + this.GetPlayerItemId() + "]\" value=\"0\" data-max=\"" + this.count + "\">\n                        <a class=\"abutton\">\n                            <img src=\"img/ic_plus.png\" style=\"vertical-align:middle\" class=\"add-count-to-item\">\n                        </a>\n                        <br>\n                        <a href=\"#\" class=\"set-total-count\">" + this.count + " (all)</a>\n                    </center>\n                </div>\n            </div>\n        ";
     };
     Item.prototype.GetInfoElement = function () {
         var node = document.createElement('div');
