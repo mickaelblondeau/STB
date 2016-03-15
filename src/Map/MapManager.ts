@@ -41,7 +41,7 @@ class MapManager {
     }
 
     static CheckLoaded() {
-        if(!document.querySelector('#game .icon') || !document.querySelector('#game .heroes.player')) {
+        if(!document.querySelector('#game .icon')) {
             setTimeout(function(){ MapManager.CheckLoaded(); }, 200);
         } else {
             MapManager.LoadMap();
@@ -166,7 +166,12 @@ class MapManager {
     }
 
     static GetPlayerFaction() {
-        MapManager.factionId = MapManager.RbgToId(window.getComputedStyle(document.querySelector('#game .heroes.player p')).color);
+        let selector = document.querySelector('#game .heroes.player p');
+        if(selector) {
+            MapManager.factionId = MapManager.RbgToId(window.getComputedStyle(document.querySelector('#game .heroes.player p')).color);
+        } else {
+            MapManager.factionId = 0;
+        }
     }
 
     static LoadDiplomacy() {
