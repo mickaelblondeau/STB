@@ -891,7 +891,7 @@ var MapManager = (function () {
         return datas;
     };
     MapManager.CheckLoaded = function () {
-        if (!document.querySelector('#game .icon') || !document.querySelector('#game .heroes.player')) {
+        if (!document.querySelector('#game .icon')) {
             setTimeout(function () { MapManager.CheckLoaded(); }, 200);
         }
         else {
@@ -964,7 +964,13 @@ var MapManager = (function () {
         return parseInt(colors[0] + colors[1] + colors[2]);
     };
     MapManager.GetPlayerFaction = function () {
-        MapManager.factionId = MapManager.RbgToId(window.getComputedStyle(document.querySelector('#game .heroes.player p')).color);
+        var selector = document.querySelector('#game .heroes.player p');
+        if (selector) {
+            MapManager.factionId = MapManager.RbgToId(window.getComputedStyle(document.querySelector('#game .heroes.player p')).color);
+        }
+        else {
+            MapManager.factionId = 0;
+        }
     };
     MapManager.LoadDiplomacy = function () {
         MapManager.diplomacies = JSON.parse(localStorage.getItem('stb3_diplomacy') || '{}');
