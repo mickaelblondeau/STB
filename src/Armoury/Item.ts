@@ -114,9 +114,17 @@ class Item {
         return 'item-' + this.playerItemId + '-' + (this.inFief ? 1 : 0);
     }
 
+    GetCategoryId(): string {
+        if(this.category) {
+            return this.category.id.split('cat')[1];
+        } else {
+            return '-100';
+        }
+    }
+
     GetInfoHTML(): string {
         return `
-            <div class="item" id="${this.GetBlockId()}" data-player-item-id="${this.GetBlockId()}" data-loom="${this.loomLevel}" data-name="${this.name}" data-category="" data-id="${this.GetItemId()}" style="${this.GetColor()}">
+            <div class="item" id="${this.GetBlockId()}" data-player-item-id="${this.GetBlockId()}" data-loom="${this.loomLevel}" data-name="${this.name}" data-category="${this.GetCategoryId()}" data-id="${this.GetItemId()}" style="${this.GetColor()}">
                 <div class="header">
                     <img width="70" height="70" src="${this.GetImage()}" rel="${this.GetTooltip()}" title="${this.name}" class="itemstats">
                     <div class="name">${this.name}</div>
