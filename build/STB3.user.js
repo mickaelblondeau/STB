@@ -167,8 +167,16 @@ var Item = (function () {
     Item.prototype.GetBlockId = function () {
         return 'item-' + this.playerItemId + '-' + (this.inFief ? 1 : 0);
     };
+    Item.prototype.GetCategoryId = function () {
+        if (this.category) {
+            return this.category.id.split('cat')[1];
+        }
+        else {
+            return '-100';
+        }
+    };
     Item.prototype.GetInfoHTML = function () {
-        return "\n            <div class=\"item\" id=\"" + this.GetBlockId() + "\" data-player-item-id=\"" + this.GetBlockId() + "\" data-loom=\"" + this.loomLevel + "\" data-name=\"" + this.name + "\" data-category=\"\" data-id=\"" + this.GetItemId() + "\" style=\"" + this.GetColor() + "\">\n                <div class=\"header\">\n                    <img width=\"70\" height=\"70\" src=\"" + this.GetImage() + "\" rel=\"" + this.GetTooltip() + "\" title=\"" + this.name + "\" class=\"itemstats\">\n                    <div class=\"name\">" + this.name + "</div>\n                </div>\n                <div class=\"desc\">\n                    <center>\n                        <a class=\"abutton\">\n                            <img src=\"img/ic_minus.png\" style=\"vertical-align:middle\" class=\"remove-count-from-item\">\n                        </a>\n                        <input class=\"in item-count-input\" id=\"hero_transfer_item_" + this.playerItemId + "\" name=\"transfer[" + this.GetPlayerItemId() + "]\" value=\"0\" data-max=\"" + this.count + "\">\n                        <a class=\"abutton\">\n                            <img src=\"img/ic_plus.png\" style=\"vertical-align:middle\" class=\"add-count-to-item\">\n                        </a>\n                        <br>\n                        <a href=\"#\" class=\"set-total-count\">" + this.count + " (all)</a>\n                    </center>\n                </div>\n            </div>\n        ";
+        return "\n            <div class=\"item\" id=\"" + this.GetBlockId() + "\" data-player-item-id=\"" + this.GetBlockId() + "\" data-loom=\"" + this.loomLevel + "\" data-name=\"" + this.name + "\" data-category=\"" + this.GetCategoryId() + "\" data-id=\"" + this.GetItemId() + "\" style=\"" + this.GetColor() + "\">\n                <div class=\"header\">\n                    <img width=\"70\" height=\"70\" src=\"" + this.GetImage() + "\" rel=\"" + this.GetTooltip() + "\" title=\"" + this.name + "\" class=\"itemstats\">\n                    <div class=\"name\">" + this.name + "</div>\n                </div>\n                <div class=\"desc\">\n                    <center>\n                        <a class=\"abutton\">\n                            <img src=\"img/ic_minus.png\" style=\"vertical-align:middle\" class=\"remove-count-from-item\">\n                        </a>\n                        <input class=\"in item-count-input\" id=\"hero_transfer_item_" + this.playerItemId + "\" name=\"transfer[" + this.GetPlayerItemId() + "]\" value=\"0\" data-max=\"" + this.count + "\">\n                        <a class=\"abutton\">\n                            <img src=\"img/ic_plus.png\" style=\"vertical-align:middle\" class=\"add-count-to-item\">\n                        </a>\n                        <br>\n                        <a href=\"#\" class=\"set-total-count\">" + this.count + " (all)</a>\n                    </center>\n                </div>\n            </div>\n        ";
     };
     Item.prototype.GetInfoElement = function () {
         var node = document.createElement('div');
@@ -347,6 +355,7 @@ var ArmouryManager = (function () {
             ArmouryManager.AddFilters();
             ArmouryManager.AddPresets();
             ArmouryManager.EventsListeners();
+            ArmouryManager.SortItems();
         }
         if (isOnPage('news.php?buy')) {
             var localCategories = JSON.parse(localStorage.getItem('stb3_categories') || '{}');
@@ -792,6 +801,19 @@ var ArmouryManager = (function () {
                 var item = ArmouryManager.FindItemById(id);
                 item.ChangeValue();
             });
+        }
+    };
+    ArmouryManager.SortItems = function () {
+        var charItems = document.getElementById('stb-char-items');
+        var list = Array.prototype.slice.call(charItems.children, 0);
+        list.sort(function (a, b) {
+            var aCat = parseInt(a.getAttribute('data-category'));
+            var bCat = parseInt(b.getAttribute('data-category'));
+            return aCat - bCat;
+        });
+        charItems.innerHTML = '';
+        for (var i = 0, l = list.length; i < l; i++) {
+            charItems.appendChild(list[i]);
         }
     };
     ArmouryManager.GREEN_QUALITY = 'rgba(0, 100, 0, 0.2)';

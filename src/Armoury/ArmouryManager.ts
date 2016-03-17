@@ -75,6 +75,8 @@ class ArmouryManager {
             ArmouryManager.AddPresets();
 
             ArmouryManager.EventsListeners();
+
+            ArmouryManager.SortItems();
         }
 
         if(isOnPage('news.php?buy')) {
@@ -617,6 +619,22 @@ class ArmouryManager {
                 let item = ArmouryManager.FindItemById(id);
                 item.ChangeValue();
             });
+        }
+    }
+
+    static SortItems() {
+        let charItems = document.getElementById('stb-char-items');
+        let list = Array.prototype.slice.call(charItems.children, 0);
+
+        list.sort(function(a, b) {
+            let aCat = parseInt(a.getAttribute('data-category'));
+            let bCat = parseInt(b.getAttribute('data-category'));
+            return aCat - bCat;
+        });
+
+        charItems.innerHTML = '';
+        for(let i = 0, l = list.length; i < l; i++) {
+            charItems.appendChild(list[i]);
         }
     }
 }
