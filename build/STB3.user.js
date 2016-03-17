@@ -804,16 +804,22 @@ var ArmouryManager = (function () {
         }
     };
     ArmouryManager.SortItems = function () {
-        var charItems = document.getElementById('stb-char-items');
-        var list = Array.prototype.slice.call(charItems.children, 0);
+        ArmouryManager.SortBase(document.getElementById('stb-char-items'));
+        var fiefItems = document.getElementById('stb-char-items');
+        if (fiefItems) {
+            ArmouryManager.SortBase(fiefItems);
+        }
+    };
+    ArmouryManager.SortBase = function (items) {
+        var list = Array.prototype.slice.call(items.children, 0);
         list.sort(function (a, b) {
             var aCat = parseInt(a.getAttribute('data-category'));
             var bCat = parseInt(b.getAttribute('data-category'));
             return aCat - bCat;
         });
-        charItems.innerHTML = '';
+        items.innerHTML = '';
         for (var i = 0, l = list.length; i < l; i++) {
-            charItems.appendChild(list[i]);
+            items.appendChild(list[i]);
         }
     };
     ArmouryManager.GREEN_QUALITY = 'rgba(0, 100, 0, 0.2)';

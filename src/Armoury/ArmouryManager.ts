@@ -623,18 +623,26 @@ class ArmouryManager {
     }
 
     static SortItems() {
-        let charItems = document.getElementById('stb-char-items');
-        let list = Array.prototype.slice.call(charItems.children, 0);
+        ArmouryManager.SortBase(document.getElementById('stb-char-items'));
 
-        list.sort(function(a, b) {
+        let fiefItems = document.getElementById('stb-char-items');
+        if(fiefItems) {
+            ArmouryManager.SortBase(fiefItems);
+        }
+    }
+
+    static SortBase(items: HTMLElement) {
+        let list = Array.prototype.slice.call(items.children, 0);
+
+        list.sort(function(a: HTMLElement, b: HTMLElement) {
             let aCat = parseInt(a.getAttribute('data-category'));
             let bCat = parseInt(b.getAttribute('data-category'));
             return aCat - bCat;
         });
 
-        charItems.innerHTML = '';
+        items.innerHTML = '';
         for(let i = 0, l = list.length; i < l; i++) {
-            charItems.appendChild(list[i]);
+            items.appendChild(list[i]);
         }
     }
 }
